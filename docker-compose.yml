@@ -25,6 +25,9 @@ services:
     restart: unless-stopped
     environment:
       - NUXT_PUBLIC_API_BASE=${NUXT_PUBLIC_API_BASE:-https://api.downloadino.com}
+      - NUXT_PUBLIC_SUPPORT_EMAIL=${NUXT_PUBLIC_SUPPORT_EMAIL:-}
+      - NUXT_PUBLIC_SUPPORT_TELEGRAM_ID=${NUXT_PUBLIC_SUPPORT_TELEGRAM_ID:-}
+      - NUXT_PUBLIC_SUPPORT_WEBSITE=${NUXT_PUBLIC_SUPPORT_WEBSITE:-}
     networks:
       - downloadino_net
 

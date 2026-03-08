@@ -8,6 +8,13 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxtjs/color-mode',
   ],
+  icon: {
+    provider: 'server',
+    fallbackToApi: false,
+    customCollections: [
+      { prefix: 'mdi', dir: './icons/mdi' },
+    ],
+  },
   colorMode: {
     preference: 'dark',
     fallback: 'dark',
@@ -17,6 +24,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://api.downloadino.com',
+      supportEmail: process.env.NUXT_PUBLIC_SUPPORT_EMAIL || '',
+      supportTelegramId: process.env.NUXT_PUBLIC_SUPPORT_TELEGRAM_ID || '',
+      supportWebsite: process.env.NUXT_PUBLIC_SUPPORT_WEBSITE || '',
     },
   },
   app: {
