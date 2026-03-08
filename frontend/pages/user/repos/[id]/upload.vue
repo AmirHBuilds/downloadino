@@ -7,18 +7,33 @@
     <div v-if="repoId <= 0" class="card p-4 text-sm text-danger">Invalid repository id.</div>
     <template v-else>
       <h1 class="text-xl font-bold mb-2">Upload files</h1>
-      <p class="text-sm text-muted mb-6">Repository ID: {{ repoId }}</p>
+      <p class="text-sm text-muted mb-6">Repository: {{ repoName || `#${repoId}` }}</p>
       <UploadZone :repo-id="repoId" @uploaded="onUploaded" />
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { Repo } from '~/types'
+
 definePageMeta({ middleware: 'auth' })
 useSeoMeta({ title: 'Upload Files' })
 
 const route = useRoute()
 const repoId = computed(() => Number(route.params.id || 0))
+const { get } = useApi()
+
+const { data: repo } = await useAsyncData(
+  'upload-repo',
+  async () => {
+    if (repoId.value <= 0) return null
+    const repos = await get<Repo[]>('/api/repos/mine')
+    return repos.find((entry) => entry.id === repoId.value) || null
+  },
+  { watch: [repoId] },
+)
+
+const repoName = computed(() => repo.value?.name || '')
 
 function onUploaded() {
   refreshNuxtData('my-repos')

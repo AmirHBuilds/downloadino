@@ -13,17 +13,28 @@
 
     <!-- Upload queue -->
     <div v-if="queue.length" class="mt-3 space-y-2">
-      <div v-for="item in queue" :key="item.name" class="card px-3 py-2">
-        <div class="flex items-center justify-between mb-1.5">
+      <div v-for="item in queue" :key="item.id" class="card px-3 py-2">
+        <div class="flex items-center justify-between mb-1.5 gap-2">
           <span class="text-xs font-mono truncate max-w-xs">{{ item.name }}</span>
-          <span class="text-xs font-mono" :class="item.status === 'error' ? 'text-danger' : item.status === 'done' ? 'text-success' : 'text-muted'">
-            {{ item.status === 'error' ? item.error : item.status === 'done' ? '✓ Done' : `${item.progress}%` }}
-          </span>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono" :class="item.status === 'error' ? 'text-danger' : item.status === 'done' ? 'text-success' : item.status === 'queued' ? 'text-muted' : 'text-muted'">
+              {{ item.status === 'error' ? item.error : item.status === 'done' ? '✓ Done' : item.status === 'queued' ? 'Queued' : `${item.progress}%` }}
+            </span>
+            <button
+              type="button"
+              class="text-muted hover:text-danger transition-colors"
+              :disabled="item.status === 'uploading'"
+              @click="removeFromQueue(item.id)"
+              :title="item.status === 'uploading' ? 'Cannot remove while uploading' : 'Remove from queue'"
+            >
+              <Icon name="mdi:trash-can-outline" class="w-4 h-4" />
+            </button>
+          </div>
         </div>
         <div class="h-1 bg-surface-2 rounded-full overflow-hidden">
           <div class="h-full rounded-full transition-all"
-            :class="item.status === 'error' ? 'bg-danger' : item.status === 'done' ? 'bg-success' : 'bg-accent-2'"
-            :style="{ width: `${item.progress}%` }" />
+            :class="item.status === 'error' ? 'bg-danger' : item.status === 'done' ? 'bg-success' : item.status === 'queued' ? 'bg-surface-3' : 'bg-accent-2'"
+            :style="{ width: `${item.status === 'queued' ? 0 : item.progress}%` }" />
         </div>
       </div>
     </div>
@@ -37,8 +48,16 @@ const emit  = defineEmits<{ uploaded: [] }>()
 const { uploadFile } = useApi()
 const isDragging = ref(false)
 const inputRef   = ref<HTMLInputElement>()
+const processing = ref(false)
 
-interface QueueItem { name: string; progress: number; status: 'uploading' | 'done' | 'error'; error?: string }
+interface QueueItem {
+  id: string
+  file: File
+  name: string
+  progress: number
+  status: 'queued' | 'uploading' | 'done' | 'error'
+  error?: string
+}
 const queue = ref<QueueItem[]>([])
 
 function onDrop(e: DragEvent) {
@@ -54,21 +73,52 @@ function onSelect(e: Event) {
   input.value = ""
 }
 
-async function uploadAll(files: File[]) {
+function removeFromQueue(id: string) {
+  const item = queue.value.find((entry) => entry.id === id)
+  if (!item || item.status === 'uploading') return
+  queue.value = queue.value.filter((entry) => entry.id !== id)
+}
+
+function uploadAll(files: File[]) {
+  if (!files.length) return
   for (const file of files) {
-    const item: QueueItem = { name: file.name, progress: 0, status: 'uploading' }
+    const item = reactive<QueueItem>({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      file,
+      name: file.name,
+      progress: 0,
+      status: 'queued',
+    })
     queue.value.push(item)
-    const fd = new FormData()
-    fd.append('file', file)
-    try {
-      await uploadFile(`/api/repos/${props.repoId}/files`, fd, (pct) => { item.progress = pct })
-      item.status = 'done'
-      item.progress = 100
-      emit('uploaded')
-    } catch (err: any) {
-      item.status = 'error'
-      item.error = err.message
+  }
+  processQueue()
+}
+
+async function processQueue() {
+  if (processing.value) return
+  processing.value = true
+
+  try {
+    while (true) {
+      const item = queue.value.find((entry) => entry.status === 'queued')
+      if (!item) break
+
+      item.status = 'uploading'
+      const fd = new FormData()
+      fd.append('file', item.file)
+
+      try {
+        await uploadFile(`/api/repos/${props.repoId}/files`, fd, (pct) => { item.progress = pct })
+        item.status = 'done'
+        item.progress = 100
+        emit('uploaded')
+      } catch (err: any) {
+        item.status = 'error'
+        item.error = err.message
+      }
     }
+  } finally {
+    processing.value = false
   }
 }
 </script>
