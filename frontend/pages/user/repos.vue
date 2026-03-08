@@ -42,7 +42,7 @@
             </div>
           </div>
           <div class="flex items-center gap-1 shrink-0">
-            <NuxtLink :to="`/user/repos/${repo.id}/upload`" class="btn-ghost py-1 px-2 text-xs">Upload</NuxtLink>
+            <button @click.stop="goToUpload(repo.id)" class="btn-ghost py-1 px-2 text-xs">Upload</button>
             <button @click="deleteRepo(repo.id)" class="btn-ghost py-1 px-2 text-xs text-danger hover:text-danger">
               <Icon name="mdi:trash-can-outline" class="w-4 h-4" />
             </button>
