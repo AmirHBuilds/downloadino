@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     S3_SECRET_KEY: Optional[str] = None
     S3_BUCKET_NAME: str = "downloadino-files"
     S3_REGION: str = "ir-thr-at1"
+    S3_CONNECT_TIMEOUT_SECONDS: int = 30
+    S3_READ_TIMEOUT_SECONDS: int = 300
+    S3_MAX_RETRIES: int = 8
+    S3_MULTIPART_THRESHOLD_BYTES: int = 8 * 1024 * 1024
+    S3_MULTIPART_CHUNK_SIZE_BYTES: int = 8 * 1024 * 1024
     LOCAL_STORAGE_PATH: str = "/data/files"
 
     DEFAULT_STORAGE_LIMIT: int = 104_857_600

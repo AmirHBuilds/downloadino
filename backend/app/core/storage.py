@@ -1,9 +1,24 @@
-import os, uuid
+import io
+import os
+import uuid
+
 import aiofiles
 import aioboto3
+from boto3.s3.transfer import TransferConfig
 from botocore.client import Config
 from fastapi import HTTPException
+
 from app.config import settings
+
+
+def _s3_client_config() -> Config:
+    return Config(
+        signature_version="s3v4",
+        connect_timeout=settings.S3_CONNECT_TIMEOUT_SECONDS,
+        read_timeout=settings.S3_READ_TIMEOUT_SECONDS,
+        retries={"max_attempts": settings.S3_MAX_RETRIES, "mode": "standard"},
+    )
+
 
 def _s3_session():
     return aioboto3.Session(
@@ -12,17 +27,47 @@ def _s3_session():
         region_name=settings.S3_REGION,
     )
 
+
 def _stored_name(original: str) -> str:
     ext = os.path.splitext(original)[1].lower()
     return f"{uuid.uuid4().hex}{ext}"
+
+
+async def _upload_to_s3(s3, storage_path: str, original_filename: str, content: bytes) -> None:
+    extra_args = {"ContentDisposition": f'attachment; filename="{original_filename}"'}
+
+    if len(content) >= settings.S3_MULTIPART_THRESHOLD_BYTES:
+        await s3.upload_fileobj(
+            io.BytesIO(content),
+            settings.S3_BUCKET_NAME,
+            storage_path,
+            ExtraArgs=extra_args,
+            Config=TransferConfig(
+                multipart_threshold=settings.S3_MULTIPART_THRESHOLD_BYTES,
+                multipart_chunksize=settings.S3_MULTIPART_CHUNK_SIZE_BYTES,
+            ),
+        )
+        return
+
+    await s3.put_object(
+        Bucket=settings.S3_BUCKET_NAME,
+        Key=storage_path,
+        Body=content,
+        ContentDisposition=extra_args["ContentDisposition"],
+    )
+
 
 async def save_file(content: bytes, original_filename: str, repo_id: int) -> tuple[str, str]:
     stored_name = _stored_name(original_filename)
     storage_path = f"repos/{repo_id}/{stored_name}"
     if settings.STORAGE_BACKEND == "s3":
-        async with _s3_session().client("s3", endpoint_url=settings.S3_ENDPOINT_URL, config=Config(signature_version="s3v4")) as s3:
+        async with _s3_session().client(
+            "s3",
+            endpoint_url=settings.S3_ENDPOINT_URL,
+            config=_s3_client_config(),
+        ) as s3:
             try:
-                await s3.put_object(Bucket=settings.S3_BUCKET_NAME, Key=storage_path, Body=content, ContentDisposition=f'attachment; filename="{original_filename}"')
+                await _upload_to_s3(s3, storage_path, original_filename, content)
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Storage error: {e}")
     else:
@@ -32,9 +77,14 @@ async def save_file(content: bytes, original_filename: str, repo_id: int) -> tup
             await f.write(content)
     return stored_name, storage_path
 
+
 async def delete_file(storage_path: str) -> None:
     if settings.STORAGE_BACKEND == "s3":
-        async with _s3_session().client("s3", endpoint_url=settings.S3_ENDPOINT_URL, config=Config(signature_version="s3v4")) as s3:
+        async with _s3_session().client(
+            "s3",
+            endpoint_url=settings.S3_ENDPOINT_URL,
+            config=_s3_client_config(),
+        ) as s3:
             try:
                 await s3.delete_object(Bucket=settings.S3_BUCKET_NAME, Key=storage_path)
             except Exception:
@@ -44,9 +94,14 @@ async def delete_file(storage_path: str) -> None:
         if os.path.exists(full):
             os.remove(full)
 
+
 async def get_file_content(storage_path: str) -> bytes:
     if settings.STORAGE_BACKEND == "s3":
-        async with _s3_session().client("s3", endpoint_url=settings.S3_ENDPOINT_URL, config=Config(signature_version="s3v4")) as s3:
+        async with _s3_session().client(
+            "s3",
+            endpoint_url=settings.S3_ENDPOINT_URL,
+            config=_s3_client_config(),
+        ) as s3:
             try:
                 r = await s3.get_object(Bucket=settings.S3_BUCKET_NAME, Key=storage_path)
                 return await r["Body"].read()
@@ -59,11 +114,24 @@ async def get_file_content(storage_path: str) -> bytes:
         async with aiofiles.open(full, "rb") as f:
             return await f.read()
 
+
 async def get_presigned_url(storage_path: str, original_filename: str, expires: int = 3600) -> str | None:
     if settings.STORAGE_BACKEND != "s3":
         return None
-    async with _s3_session().client("s3", endpoint_url=settings.S3_ENDPOINT_URL, config=Config(signature_version="s3v4")) as s3:
+    async with _s3_session().client(
+        "s3",
+        endpoint_url=settings.S3_ENDPOINT_URL,
+        config=_s3_client_config(),
+    ) as s3:
         try:
-            return await s3.generate_presigned_url("get_object", Params={"Bucket": settings.S3_BUCKET_NAME, "Key": storage_path, "ResponseContentDisposition": f'attachment; filename="{original_filename}"'}, ExpiresIn=expires)
+            return await s3.generate_presigned_url(
+                "get_object",
+                Params={
+                    "Bucket": settings.S3_BUCKET_NAME,
+                    "Key": storage_path,
+                    "ResponseContentDisposition": f'attachment; filename="{original_filename}"',
+                },
+                ExpiresIn=expires,
+            )
         except Exception:
             return None
