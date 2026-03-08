@@ -62,7 +62,7 @@ const menuRef = ref<HTMLElement>()
 onClickOutside(menuRef, () => { menuOpen.value = false })
 
 function doSearch() {
-  if (search.value.trim()) navigateTo(`/explore?q=${encodeURIComponent(search.value.trim())}`)
+  if (search.value.trim()) navigateTo(`/search?q=${encodeURIComponent(search.value.trim())}`)
 }
 
 const myReposHref = computed(() => (user.value?.username ? `/${user.value.username}/repos` : '/user/repos'))

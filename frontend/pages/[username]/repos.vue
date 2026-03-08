@@ -26,7 +26,7 @@
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2 mb-1 flex-wrap">
               <NuxtLink :to="`/${repo.owner.username}/${repo.slug}`" class="font-medium text-accent-2 hover:underline text-sm">{{ repo.name }}</NuxtLink>
-              <VerificationBadge :status="repo.verification_status" />
+              <VerificationBadge :status="displayStatus(repo.verification_status)" />
               <span class="text-xs font-mono text-muted border border-border px-1.5 py-0.5 rounded">{{ repo.is_public ? 'Public' : 'Private' }}</span>
             </div>
             <p v-if="repo.description" class="text-xs text-muted truncate">{{ repo.description }}</p>
@@ -78,6 +78,7 @@
 <script setup lang="ts">
 import { formatBytes, formatRelative } from '~/utils/format'
 import type { Repo } from '~/types'
+import { visibleVerificationStatus, type VerificationStatus } from '~/utils/repo'
 
 const route = useRoute()
 const { get, post, delete: del } = useApi()
@@ -87,6 +88,7 @@ const username = computed(() => String(route.params.username || ''))
 if (useCookie<string | null>('token').value && !user.value) await fetchUser()
 
 const isOwner = computed(() => !!user.value && user.value.username === username.value)
+const displayStatus = (status: VerificationStatus) => visibleVerificationStatus(status, !!isOwner.value)
 
 const { data: repos, pending, refresh } = await useAsyncData(
   () => `user-repos:${username.value}:${isOwner.value ? 'mine' : 'public'}`,

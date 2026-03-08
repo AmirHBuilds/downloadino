@@ -6,7 +6,11 @@
       <div class="card h-48"></div>
     </div>
     <template v-else-if="repo">
-      <div v-if="repo.verification_status === 'unverified'" class="flex items-start gap-3 bg-warning/5 border border-warning/30 rounded-lg px-4 py-3 mb-6 text-sm text-warning">
+      <div v-if="displayStatus === 'rejected'" class="flex items-start gap-3 bg-danger/5 border border-danger/30 rounded-lg px-4 py-3 mb-6 text-sm text-danger">
+        <Icon name="mdi:alert-circle" class="w-5 h-5 shrink-0 mt-0.5" />
+        <span><strong>Marked as spam.</strong> This repository was rejected during verification.</span>
+      </div>
+      <div v-else-if="displayStatus === 'unverified'" class="flex items-start gap-3 bg-warning/5 border border-warning/30 rounded-lg px-4 py-3 mb-6 text-sm text-warning">
         <Icon name="mdi:alert" class="w-5 h-5 shrink-0 mt-0.5" />
         <span><strong>Unverified repository.</strong> Not reviewed by admins. Download at your own risk.</span>
       </div>
@@ -15,10 +19,10 @@
         <div>
           <div class="flex flex-wrap items-center gap-2 text-sm mb-2">
             <Icon name="mdi:source-repository" class="w-4 h-4 text-muted" />
-            <span class="text-muted">{{ repo.owner.username }}</span>
+            <NuxtLink :to="`/${repo.owner.username}/repos`" class="text-muted hover:underline">{{ repo.owner.username }}</NuxtLink>
             <span class="text-muted">/</span>
             <span class="font-semibold">{{ repo.name }}</span>
-            <VerificationBadge :status="repo.verification_status" />
+            <VerificationBadge :status="displayStatus" />
             <span class="text-xs px-1.5 py-0.5 rounded border border-border font-mono text-muted">
               {{ repo.is_public ? 'Public' : 'Private' }}
             </span>
@@ -76,6 +80,7 @@
 <script setup lang="ts">
 import { formatBytes, formatRelative } from '~/utils/format'
 import type { Repo, RepoFile } from '~/types'
+import { visibleVerificationStatus } from '~/utils/repo'
 
 const route = useRoute()
 const { get, post, delete: del } = useApi()
@@ -104,6 +109,7 @@ const { data: files, refresh: refreshFiles } = await useAsyncData(
 )
 
 const isOwner = computed(() => isLoggedIn.value && !!repo.value && user.value?.id === repo.value.owner.id)
+const displayStatus = computed(() => repo.value ? visibleVerificationStatus(repo.value.verification_status, !!isOwner.value) : 'unverified')
 
 const readmeFile = computed(() => files.value?.find((file) => file.original_name.toLowerCase() === 'readme.md') ?? null)
 
