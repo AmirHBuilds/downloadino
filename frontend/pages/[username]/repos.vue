@@ -58,10 +58,11 @@
             <label class="text-xs text-muted block mb-1.5">Description (optional)</label>
             <input v-model="newRepo.description" class="input" placeholder="What is this repo for?" />
           </div>
-          <label class="flex items-center gap-2 text-sm cursor-pointer">
-            <input v-model="newRepo.is_public" type="checkbox" class="rounded" />
-            Public repository
-          </label>
+          <div class="text-xs text-muted bg-surface-2/70 border border-border rounded px-3 py-2">
+            Private repositories are disabled for self-service accounts.
+            <NuxtLink to="/contact" class="text-accent-2 hover:underline">Contact support</NuxtLink>
+            if you need private repositories.
+          </div>
           <p v-if="createError" class="text-xs text-danger">{{ createError }}</p>
           <div class="flex gap-2 pt-2">
             <button @click="showCreate=false" class="btn-secondary flex-1 justify-center">Cancel</button>

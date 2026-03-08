@@ -23,7 +23,13 @@ async def _enrich(repo: Repo, db: AsyncSession) -> dict:
     }
 
 @router.get("/", response_model=list[RepoResponse])
-async def list_public_repos(q: str | None = Query(None), page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=100), db: AsyncSession = Depends(get_db)):
+async def list_public_repos(
+    q: str | None = Query(None),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    sort: str = Query("recent"),
+    db: AsyncSession = Depends(get_db),
+):
     query = select(Repo).options(selectinload(Repo.owner)).join(User, Repo.owner_id == User.id).where(Repo.is_public == True)
     if q:
         like = f"%{q}%"
@@ -35,11 +41,13 @@ async def list_public_repos(q: str | None = Query(None), page: int = Query(1, ge
                 User.username.ilike(like),
             )
         )
-    result = await db.execute(query.offset((page - 1) * limit).limit(limit).order_by(Repo.created_at.desc()))
+    order = Repo.download_count.desc() if sort == "downloads" else Repo.created_at.desc()
+    result = await db.execute(query.offset((page - 1) * limit).limit(limit).order_by(order))
     return [await _enrich(r, db) for r in result.scalars().all()]
 
 @router.post("/", response_model=RepoResponse, status_code=201)
 async def create_new_repo(data: RepoCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+    data.is_public = True
     repo = await create_repo(data, current_user, db)
     return await _enrich(repo, db)
 
@@ -95,7 +103,9 @@ async def update_repo(repo_id: int, data: RepoUpdate, db: AsyncSession = Depends
         raise HTTPException(status_code=404, detail="Repository not found or access denied")
     if data.name is not None: repo.name = data.name
     if data.description is not None: repo.description = data.description
-    if data.is_public is not None: repo.is_public = data.is_public
+    if data.is_public is not None and data.is_public is False:
+        raise HTTPException(status_code=400, detail="Private repositories are only available via support")
+    if data.is_public is not None: repo.is_public = True
     return await _enrich(repo, db)
 
 @router.delete("/{repo_id}")
