@@ -46,6 +46,17 @@ NUXT_PUBLIC_SUPPORT_TELEGRAM_ID=@downloadino_support
 NUXT_PUBLIC_SUPPORT_WEBSITE=https://downloadino.com
 ```
 
+Then recreate the frontend container so Nuxt picks up new env values:
+
+```bash
+docker compose up -d --build frontend
+```
+
+### Offline icon mode (no public internet needed)
+
+This project is configured to load icons from local files under `frontend/icons/mdi` via Nuxt Icon custom collections.
+No Iconify API access is required.
+
 ## Build and push images to Docker Hub
 
 Run these commands from project root on your own machine:

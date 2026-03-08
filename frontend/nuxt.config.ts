@@ -8,6 +8,13 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxtjs/color-mode',
   ],
+  icon: {
+    provider: 'server',
+    fallbackToApi: false,
+    customCollections: [
+      { prefix: 'mdi', dir: './icons/mdi' },
+    ],
+  },
   colorMode: {
     preference: 'dark',
     fallback: 'dark',
@@ -27,6 +34,7 @@ export default defineNuxtConfig({
       htmlAttrs: { class: 'dark' },
       titleTemplate: '%s — Downloadino',
       link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;600;700;800&display=swap' },
       ],
