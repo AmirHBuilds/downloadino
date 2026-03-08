@@ -114,6 +114,10 @@ async function createRepo() {
 }
 
 
+function goToUpload(id: number) {
+  navigateTo(`/user/repos/${id}/upload`)
+}
+
 async function deleteRepo(id: number) {
   if (!confirm('Delete this repository and all its files?')) return
   await del(`/api/repos/${id}`)
