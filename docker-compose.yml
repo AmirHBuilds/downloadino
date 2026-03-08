@@ -3,7 +3,8 @@ version: "3.9"
 services:
 
   api:
-    image: voidtrek/downloadino_backend:latest
+    # image: voidtrek/downloadino_backend:latest
+    build: ./backend
     container_name: downloadino_api
     restart: unless-stopped
     env_file: ./.env
@@ -18,7 +19,8 @@ services:
       - downloadino_net
 
   frontend:
-    image: voidtrek/downloadino_frontend:latest
+    # image: voidtrek/downloadino_frontend:latest
+    build: ./frontend
     container_name: downloadino_frontend
     restart: unless-stopped
     environment:
@@ -60,7 +62,8 @@ services:
       - downloadino_net
 
   nginx:
-    image: voidtrek/downloadino_nginx:latest
+    # image: voidtrek/downloadino_nginx:latest
+    build: ./nginx
     container_name: downloadino_nginx
     restart: unless-stopped
     ports:
