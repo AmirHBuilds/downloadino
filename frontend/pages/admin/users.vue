@@ -60,7 +60,11 @@ definePageMeta({ layout: 'admin', middleware: 'admin' })
 useSeoMeta({ title: 'Admin · Users' })
 const { get, put, delete: del } = useApi()
 const q = ref('')
-const { data: users, refresh } = await useAsyncData('admin-users', () => get<User[]>(`/api/admin/users${q.value ? `?q=${q.value}` : ''}`))
+const { data: users, refresh } = await useAsyncData(
+  () => `admin-users:${q.value}`,
+  () => get<User[]>(`/api/admin/users${q.value ? `?q=${q.value}` : ''}`),
+  { server: false, default: () => [] },
+)
 const debouncedRefresh = useDebounceFn(() => refresh(), 400)
 async function toggleBan(u: User) {
   await put(`/api/admin/users/${u.id}`, { is_banned: !u.is_banned })
