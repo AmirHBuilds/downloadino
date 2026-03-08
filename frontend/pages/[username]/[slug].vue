@@ -129,26 +129,79 @@ function escapeHtml(content: string) {
 
 function markdownToHtml(content: string) {
   const escaped = escapeHtml(content)
-  const blocks = escaped.split(/\n{2,}/).map((part) => part.trim()).filter(Boolean)
-  return blocks.map((block) => {
-    if (block.startsWith('### ')) return `<h3>${block.slice(4)}</h3>`
-    if (block.startsWith('## ')) return `<h2>${block.slice(3)}</h2>`
-    if (block.startsWith('# ')) return `<h1>${block.slice(2)}</h1>`
-    if (block.startsWith('- ')) {
-      const items = block.split('\n').map((line) => `<li>${line.replace(/^-\s+/, '')}</li>`).join('')
-      return `<ul>${items}</ul>`
+  const lines = escaped.replace(/\r\n/g, '\n').split('\n')
+  const html: string[] = []
+  let inCode = false
+  let listType: 'ul' | 'ol' | null = null
+
+  const closeList = () => {
+    if (listType) {
+      html.push(`</${listType}>`)
+      listType = null
     }
-    if (block.startsWith('```') && block.endsWith('```')) {
-      return `<pre><code>${block.slice(3, -3).trim()}</code></pre>`
+  }
+
+  const inline = (line: string) => line
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+
+  for (const rawLine of lines) {
+    const line = rawLine.trimEnd()
+
+    if (line.startsWith('```')) {
+      closeList()
+      html.push(inCode ? '</code></pre>' : '<pre><code>')
+      inCode = !inCode
+      continue
     }
-    const withInline = block
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-      .replace(/\n/g, '<br>')
-    return `<p>${withInline}</p>`
-  }).join('')
+
+    if (inCode) {
+      html.push(`${line}\n`)
+      continue
+    }
+
+    if (!line.trim()) {
+      closeList()
+      continue
+    }
+
+    if (line.startsWith('### ')) { closeList(); html.push(`<h3>${inline(line.slice(4))}</h3>`); continue }
+    if (line.startsWith('## ')) { closeList(); html.push(`<h2>${inline(line.slice(3))}</h2>`); continue }
+    if (line.startsWith('# ')) { closeList(); html.push(`<h1>${inline(line.slice(2))}</h1>`); continue }
+    if (line.startsWith('> ')) { closeList(); html.push(`<blockquote>${inline(line.slice(2))}</blockquote>`); continue }
+    if (/^-{3,}$/.test(line) || /^\*{3,}$/.test(line)) { closeList(); html.push('<hr>'); continue }
+
+    const unorderedMatch = line.match(/^[-*]\s+(.+)$/)
+    if (unorderedMatch) {
+      if (listType !== 'ul') {
+        closeList()
+        html.push('<ul>')
+        listType = 'ul'
+      }
+      html.push(`<li>${inline(unorderedMatch[1])}</li>`)
+      continue
+    }
+
+    const orderedMatch = line.match(/^\d+\.\s+(.+)$/)
+    if (orderedMatch) {
+      if (listType !== 'ol') {
+        closeList()
+        html.push('<ol>')
+        listType = 'ol'
+      }
+      html.push(`<li>${inline(orderedMatch[1])}</li>`)
+      continue
+    }
+
+    closeList()
+    html.push(`<p>${inline(line)}</p>`)
+  }
+
+  closeList()
+  if (inCode) html.push('</code></pre>')
+  return html.join('')
 }
 
 const readmeHtml = computed(() => (readmeContent.value ? markdownToHtml(readmeContent.value) : ''))

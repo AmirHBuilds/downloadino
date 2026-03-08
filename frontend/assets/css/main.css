@@ -38,4 +38,6 @@
   .markdown-body pre code { @apply bg-transparent p-0 text-xs; }
   .markdown-body a { @apply text-accent-2 underline; }
   .markdown-body blockquote { @apply border-l-2 border-border pl-3 text-muted mb-3; }
+  .markdown-body hr { @apply border-border my-4; }
+  .markdown-body li { @apply mb-1; }
 }
