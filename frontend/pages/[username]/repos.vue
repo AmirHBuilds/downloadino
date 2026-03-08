@@ -89,12 +89,12 @@ if (useCookie<string | null>('token').value && !user.value) await fetchUser()
 const isOwner = computed(() => !!user.value && user.value.username === username.value)
 
 const { data: repos, pending, refresh } = await useAsyncData(
-  'user-repos',
+  () => `user-repos:${username.value}:${isOwner.value ? 'mine' : 'public'}`,
   async () => {
     if (isOwner.value) return get<Repo[]>('/api/repos/mine')
     return get<Repo[]>(`/api/repos/users/${username.value}`)
   },
-  { watch: [isOwner, username] },
+  { watch: [isOwner, username], server: false, default: () => [] },
 )
 
 const showCreate = ref(false)

@@ -26,13 +26,13 @@ const username = computed(() => String(route.params.username || ''))
 const slug = computed(() => String(route.params.slug || ''))
 
 const { data: repo } = await useAsyncData(
-  'upload-repo-by-identity',
+  () => `upload-repo-by-identity:${username.value}:${slug.value}`,
   async () => {
     if (!username.value || !slug.value) return null
     const repos = await get<Repo[]>('/api/repos/mine')
     return repos.find((entry) => entry.owner.username === username.value && entry.slug === slug.value) || null
   },
-  { watch: [username, slug] },
+  { watch: [username, slug], server: false, default: () => null },
 )
 
 function onUploaded() {

@@ -18,5 +18,5 @@ await useAsyncData('my-repos-redirect', async () => {
 
   await navigateTo(`/${user.value.username}/repos`, { replace: true })
   return null
-})
+}, { server: false })
 </script>
