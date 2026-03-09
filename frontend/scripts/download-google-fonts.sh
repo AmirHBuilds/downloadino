@@ -33,8 +33,6 @@ declare -A EXPECTED_NAMES=(
 mapfile -t PARSED_ROWS < <(
   awk '
     function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
-    
-    # Extract font family name (handles both single and double quotes using \x27)
     /font-family:/ {
       if (match($0, /font-family:[[:space:]]*[\x27"]([^\x27"]+)[\x27"]/, m)) family=trim(m[1])
     }
@@ -87,4 +85,17 @@ for key in "${!EXPECTED_NAMES[@]}"; do
   curl -fsSL -A "${USER_AGENT}" "${selected_url}" -o "${out_file}"
 done
 
-echo "Done. Downloaded local fonts to ${OUT_DIR}"
+# --- ADDED: DOWNLOAD VAZIR FONTS ---
+echo "Downloading Vazir fonts (Directly from GitHub)..."
+VAZIR_BASE="https://raw.githubusercontent.com/rastikerdar/vazirmatn/master/fonts/webfonts"
+
+curl -fsSL "${VAZIR_BASE}/Vazirmatn-Regular.woff2" -o "${OUT_DIR}/vazir-400.woff2"
+echo "Downloaded vazir-400.woff2"
+
+curl -fsSL "${VAZIR_BASE}/Vazirmatn-Medium.woff2"  -o "${OUT_DIR}/vazir-500.woff2"
+echo "Downloaded vazir-500.woff2"
+
+curl -fsSL "${VAZIR_BASE}/Vazirmatn-Bold.woff2"    -o "${OUT_DIR}/vazir-700.woff2"
+echo "Downloaded vazir-700.woff2"
+
+echo "Done. All local fonts downloaded to ${OUT_DIR}"
