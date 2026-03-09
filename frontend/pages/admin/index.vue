@@ -22,11 +22,11 @@
         <h2 class="text-sm font-semibold mb-3">Quick Actions</h2>
         <div class="space-y-2">
           <NuxtLink to="/admin/verify" class="flex items-center justify-between p-3 rounded-md hover:bg-surface-2 transition-colors">
-            <div class="flex items-center gap-2 text-sm"><Icon name="mdi:shield-check-outline" class="w-4 h-4 text-accent-2" /> Verification Queue</div>
+            <div class="flex items-center gap-2 text-sm"><Icon name="mdilocal:shield-check-outline" class="w-4 h-4 text-accent-2" /> Verification Queue</div>
             <span v-if="stats?.pending_verifications" class="text-xs bg-warning/20 text-warning px-2 py-0.5 rounded-full font-mono">{{ stats.pending_verifications }}</span>
           </NuxtLink>
-          <NuxtLink to="/admin/users" class="flex items-center gap-2 p-3 rounded-md hover:bg-surface-2 transition-colors text-sm"><Icon name="mdi:account-group-outline" class="w-4 h-4 text-accent-2" /> Manage Users</NuxtLink>
-          <NuxtLink to="/admin/ads" class="flex items-center gap-2 p-3 rounded-md hover:bg-surface-2 transition-colors text-sm"><Icon name="mdi:advertisements" class="w-4 h-4 text-accent-2" /> Manage Ads</NuxtLink>
+          <NuxtLink to="/admin/users" class="flex items-center gap-2 p-3 rounded-md hover:bg-surface-2 transition-colors text-sm"><Icon name="mdilocal:account-group-outline" class="w-4 h-4 text-accent-2" /> Manage Users</NuxtLink>
+          <NuxtLink to="/admin/ads" class="flex items-center gap-2 p-3 rounded-md hover:bg-surface-2 transition-colors text-sm"><Icon name="mdilocal:advertisements" class="w-4 h-4 text-accent-2" /> Manage Ads</NuxtLink>
         </div>
       </div>
       <div class="card p-4">
@@ -52,11 +52,11 @@ const { data: stats, pending } = await useAsyncData(
   { server: false, default: () => null },
 )
 const statCards = computed(() => [
-  { label: 'Total Users',   value: stats.value?.total_users || 0,     icon: 'mdi:account-group-outline', color: 'bg-accent-2/10 text-accent-2' },
-  { label: 'Repositories',  value: stats.value?.total_repos || 0,     icon: 'mdi:source-repository',     color: 'bg-success/10 text-success' },
-  { label: 'Files',         value: stats.value?.total_files || 0,     icon: 'mdi:file-multiple-outline',  color: 'bg-accent/10 text-accent' },
-  { label: 'Pending Review',value: stats.value?.pending_verifications || 0, icon: 'mdi:shield-check-outline', color: 'bg-warning/10 text-warning' },
-  { label: 'Banned Users',  value: stats.value?.banned_users || 0,    icon: 'mdi:account-cancel-outline', color: 'bg-danger/10 text-danger' },
-  { label: 'Storage Used',  value: formatBytes(stats.value?.total_storage_bytes || 0), icon: 'mdi:database-outline', color: 'bg-surface-3 text-fg' },
+  { label: 'Total Users',   value: stats.value?.total_users || 0,     icon: 'mdilocal:account-group-outline', color: 'bg-accent-2/10 text-accent-2' },
+  { label: 'Repositories',  value: stats.value?.total_repos || 0,     icon: 'mdilocal:source-repository',     color: 'bg-success/10 text-success' },
+  { label: 'Files',         value: stats.value?.total_files || 0,     icon: 'mdilocal:file-multiple-outline',  color: 'bg-accent/10 text-accent' },
+  { label: 'Pending Review',value: stats.value?.pending_verifications || 0, icon: 'mdilocal:shield-check-outline', color: 'bg-warning/10 text-warning' },
+  { label: 'Banned Users',  value: stats.value?.banned_users || 0,    icon: 'mdilocal:account-cancel-outline', color: 'bg-danger/10 text-danger' },
+  { label: 'Storage Used',  value: formatBytes(stats.value?.total_storage_bytes || 0), icon: 'mdilocal:database-outline', color: 'bg-surface-3 text-fg' },
 ])
 </script>

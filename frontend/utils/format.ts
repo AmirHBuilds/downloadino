@@ -30,13 +30,13 @@ export function formatRelative(dateStr: string): string {
 export function fileIcon(filename: string): string {
   const ext = filename.split('.').pop()?.toLowerCase()
   const map: Record<string, string> = {
-    sh: 'mdi:console', bash: 'mdi:console', zsh: 'mdi:console',
-    py: 'mdi:language-python', js: 'mdi:language-javascript', ts: 'mdi:language-typescript',
-    json: 'mdi:code-json', yaml: 'mdi:file-code', yml: 'mdi:file-code',
-    md: 'mdi:language-markdown', txt: 'mdi:file-document-outline',
-    zip: 'mdi:folder-zip', tar: 'mdi:folder-zip', gz: 'mdi:folder-zip',
-    apk: 'mdi:android', pdf: 'mdi:file-pdf-box',
-    png: 'mdi:file-image', jpg: 'mdi:file-image', jpeg: 'mdi:file-image',
+    sh: 'mdilocal:console', bash: 'mdilocal:console', zsh: 'mdilocal:console',
+    py: 'mdilocal:language-python', js: 'mdilocal:language-javascript', ts: 'mdilocal:language-typescript',
+    json: 'mdilocal:code-json', yaml: 'mdilocal:file-code', yml: 'mdilocal:file-code',
+    md: 'mdilocal:language-markdown', txt: 'mdilocal:file-document-outline',
+    zip: 'mdilocal:folder-zip', tar: 'mdilocal:folder-zip', gz: 'mdilocal:folder-zip',
+    apk: 'mdilocal:android', pdf: 'mdilocal:file-pdf-box',
+    png: 'mdilocal:file-image', jpg: 'mdilocal:file-image', jpeg: 'mdilocal:file-image',
   }
-  return map[ext || ''] || 'mdi:file-outline'
+  return map[ext || ''] || 'mdilocal:file-outline'
 }

@@ -10,7 +10,7 @@
       <!-- Search -->
       <div class="hidden md:flex flex-1 max-w-md">
         <div class="relative w-full">
-          <Icon name="mdi:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4" />
+          <Icon name="mdilocal:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4" />
           <input v-model="search" @keyup.enter="doSearch" placeholder="Search repositories..." class="input pl-9 py-1.5 text-xs" />
         </div>
       </div>
@@ -31,14 +31,14 @@
                 <p class="text-xs text-muted truncate">{{ user?.email }}</p>
               </div>
               <NuxtLink :to="myReposHref" class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-surface-2" @click="menuOpen=false">
-                <Icon name="mdi:source-repository" class="w-4 h-4" /> Repositories
+                <Icon name="mdilocal:source-repository" class="w-4 h-4" /> Repositories
               </NuxtLink>
               <NuxtLink to="/user/settings" class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-surface-2" @click="menuOpen=false">
-                <Icon name="mdi:cog-outline" class="w-4 h-4" /> Settings
+                <Icon name="mdilocal:cog-outline" class="w-4 h-4" /> Settings
               </NuxtLink>
               <div class="border-t border-border mt-1">
                 <button @click="logout" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-surface-2">
-                  <Icon name="mdi:logout" class="w-4 h-4" /> Sign out
+                  <Icon name="mdilocal:logout" class="w-4 h-4" /> Sign out
                 </button>
               </div>
             </div>
