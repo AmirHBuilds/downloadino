@@ -4,7 +4,7 @@
       class="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-accent-2 transition-colors"
       :class="isDragging ? 'border-accent-2 bg-accent-2/5' : ''"
       @dragenter="isDragging=true" @dragleave="isDragging=false">
-      <Icon name="mdi:cloud-upload-outline" class="w-10 h-10 text-muted mx-auto mb-3" />
+      <Icon name="mdilocal:cloud-upload-outline" class="w-10 h-10 text-muted mx-auto mb-3" />
       <p class="text-sm text-fg mb-1">Drop files here or <span class="text-accent-2">browse</span></p>
       <button type="button" @click.stop="inputRef?.click()" class="btn-secondary text-xs mt-3">Select files</button>
       <p class="text-xs text-muted">Max 500MB per file · Executables blocked</p>
@@ -27,7 +27,7 @@
               @click="removeFromQueue(item.id)"
               :title="item.status === 'uploading' ? 'Cannot remove while uploading' : 'Remove from queue'"
             >
-              <Icon name="mdi:trash-can-outline" class="w-4 h-4" />
+              <Icon name="mdilocal:trash-can-outline" class="w-4 h-4" />
             </button>
           </div>
         </div>

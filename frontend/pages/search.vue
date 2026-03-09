@@ -7,7 +7,7 @@
 
     <div class="card p-4 mb-6">
       <div class="relative">
-        <Icon name="mdi:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4" />
+        <Icon name="mdilocal:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4" />
         <input
           v-model="q"
           @keyup.enter="runSearch"
@@ -26,7 +26,7 @@
     </div>
 
     <div v-else-if="searched && repos.length === 0" class="card py-16 text-center text-muted">
-      <Icon name="mdi:file-search-outline" class="w-10 h-10 mx-auto mb-3 opacity-40" />
+      <Icon name="mdilocal:file-search-outline" class="w-10 h-10 mx-auto mb-3 opacity-40" />
       <p class="text-sm">No results found.</p>
       <p class="text-xs mt-1">Try another keyword, repository slug, or username.</p>
     </div>
@@ -36,7 +36,7 @@
     </div>
 
     <div v-else class="card py-16 text-center text-muted">
-      <Icon name="mdi:magnify" class="w-10 h-10 mx-auto mb-3 opacity-40" />
+      <Icon name="mdilocal:magnify" class="w-10 h-10 mx-auto mb-3 opacity-40" />
       <p class="text-sm">Start searching to see repositories.</p>
     </div>
   </div>

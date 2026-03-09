@@ -14,7 +14,7 @@
       <div v-for="i in 9" :key="i" class="card p-4 animate-pulse h-32"></div>
     </div>
     <div v-else-if="repos?.length === 0" class="text-center py-20 text-muted">
-      <Icon name="mdi:source-repository-multiple" class="w-12 h-12 mx-auto mb-3 opacity-30" />
+      <Icon name="mdilocal:source-repository-multiple" class="w-12 h-12 mx-auto mb-3 opacity-30" />
       <p>No repositories found</p>
     </div>
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

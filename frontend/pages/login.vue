@@ -21,13 +21,13 @@
             <div class="flex gap-2 items-center mb-2">
               <img v-if="captcha" :src="captcha.image_base64" class="h-12 rounded border border-border bg-white" />
               <div v-else class="h-12 w-48 bg-surface-2 animate-pulse rounded"></div>
-              <button type="button" @click="loadCaptcha" class="btn-ghost py-1 px-2"><Icon name="mdi:refresh" class="w-4 h-4" /></button>
+              <button type="button" @click="loadCaptcha" class="btn-ghost py-1 px-2"><Icon name="mdilocal:refresh" class="w-4 h-4" /></button>
             </div>
             <input v-model="form.captcha_answer" class="input" placeholder="Enter the text above" required />
           </div>
           <p v-if="error" class="text-xs text-danger">{{ error }}</p>
           <button type="submit" class="btn-primary w-full justify-center py-2.5" :disabled="loading">
-            <Icon v-if="loading" name="mdi:loading" class="w-4 h-4 animate-spin" />
+            <Icon v-if="loading" name="mdilocal:loading" class="w-4 h-4 animate-spin" />
             {{ loading ? 'Signing in...' : 'Sign in' }}
           </button>
         </form>

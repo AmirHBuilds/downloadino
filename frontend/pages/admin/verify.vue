@@ -2,7 +2,7 @@
   <div>
     <h1 class="text-xl font-bold mb-6">Verification Queue</h1>
     <div v-if="!repos?.length" class="card py-16 text-center text-muted text-sm">
-      <Icon name="mdi:shield-check" class="w-10 h-10 mx-auto mb-3 text-success opacity-50" />
+      <Icon name="mdilocal:shield-check" class="w-10 h-10 mx-auto mb-3 text-success opacity-50" />
       All caught up — no pending verifications
     </div>
     <div v-else class="space-y-3">
@@ -19,7 +19,7 @@
           <div class="flex items-center gap-2 shrink-0">
             <button @click="action(repo.id, 'reject')" class="btn-danger text-xs py-1.5 px-3">Reject</button>
             <button @click="action(repo.id, 'approve')" class="btn-primary text-xs py-1.5 px-3">
-              <Icon name="mdi:check" class="w-3.5 h-3.5" /> Approve
+              <Icon name="mdilocal:check" class="w-3.5 h-3.5" /> Approve
             </button>
           </div>
         </div>

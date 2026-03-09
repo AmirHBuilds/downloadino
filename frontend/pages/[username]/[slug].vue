@@ -7,18 +7,18 @@
     </div>
     <template v-else-if="repo">
       <div v-if="displayStatus === 'rejected'" class="flex items-start gap-3 bg-danger/5 border border-danger/30 rounded-lg px-4 py-3 mb-6 text-sm text-danger">
-        <Icon name="mdi:alert-circle" class="w-5 h-5 shrink-0 mt-0.5" />
+        <Icon name="mdilocal:alert-circle" class="w-5 h-5 shrink-0 mt-0.5" />
         <span><strong>Marked as spam.</strong> This repository was rejected during verification.</span>
       </div>
       <div v-else-if="displayStatus === 'unverified'" class="flex items-start gap-3 bg-warning/5 border border-warning/30 rounded-lg px-4 py-3 mb-6 text-sm text-warning">
-        <Icon name="mdi:alert" class="w-5 h-5 shrink-0 mt-0.5" />
+        <Icon name="mdilocal:alert" class="w-5 h-5 shrink-0 mt-0.5" />
         <span><strong>Unverified repository.</strong> Not reviewed by admins. Download at your own risk.</span>
       </div>
 
       <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
         <div>
           <div class="flex flex-wrap items-center gap-2 text-sm mb-2">
-            <Icon name="mdi:source-repository" class="w-4 h-4 text-muted" />
+            <Icon name="mdilocal:source-repository" class="w-4 h-4 text-muted" />
             <NuxtLink :to="`/${repo.owner.username}/repos`" class="text-muted hover:underline">{{ repo.owner.username }}</NuxtLink>
             <span class="text-muted">/</span>
             <span class="font-semibold">{{ repo.name }}</span>
@@ -31,19 +31,19 @@
         </div>
         <div class="flex items-center gap-2 shrink-0" v-if="isOwner">
           <button v-if="repo.verification_status === 'unverified'" @click="requestVerify" class="btn-secondary text-sm py-1.5">
-            <Icon name="mdi:shield-check-outline" class="w-4 h-4" /> Request Verification
+            <Icon name="mdilocal:shield-check-outline" class="w-4 h-4" /> Request Verification
           </button>
           <NuxtLink :to="`/user/repos/${repo.owner.username}/${repo.slug}/upload`" class="btn-primary text-sm py-1.5">
-            <Icon name="mdi:upload" class="w-4 h-4" /> Upload files
+            <Icon name="mdilocal:upload" class="w-4 h-4" /> Upload files
           </NuxtLink>
         </div>
       </div>
 
       <div class="flex flex-wrap gap-5 text-xs text-muted font-mono mb-6 border-b border-border pb-4">
-        <span class="flex items-center gap-1.5"><Icon name="mdi:file-multiple-outline" class="w-4 h-4" />{{ repo.file_count }} files</span>
-        <span class="flex items-center gap-1.5"><Icon name="mdi:download-outline" class="w-4 h-4" />{{ repo.download_count.toLocaleString() }}</span>
-        <span class="flex items-center gap-1.5"><Icon name="mdi:database-outline" class="w-4 h-4" />{{ formatBytes(repo.total_size) }}</span>
-        <span class="ml-auto flex items-center gap-1.5"><Icon name="mdi:clock-outline" class="w-4 h-4" />{{ formatRelative(repo.updated_at) }}</span>
+        <span class="flex items-center gap-1.5"><Icon name="mdilocal:file-multiple-outline" class="w-4 h-4" />{{ repo.file_count }} files</span>
+        <span class="flex items-center gap-1.5"><Icon name="mdilocal:download-outline" class="w-4 h-4" />{{ repo.download_count.toLocaleString() }}</span>
+        <span class="flex items-center gap-1.5"><Icon name="mdilocal:database-outline" class="w-4 h-4" />{{ formatBytes(repo.total_size) }}</span>
+        <span class="ml-auto flex items-center gap-1.5"><Icon name="mdilocal:clock-outline" class="w-4 h-4" />{{ formatRelative(repo.updated_at) }}</span>
       </div>
 
       <div class="card overflow-hidden">
@@ -52,7 +52,7 @@
           <span class="text-xs text-muted font-mono">{{ files?.length || 0 }} files</span>
         </div>
         <div v-if="!files?.length" class="py-16 text-center text-muted">
-          <Icon name="mdi:folder-open-outline" class="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <Icon name="mdilocal:folder-open-outline" class="w-10 h-10 mx-auto mb-3 opacity-30" />
           <p class="text-sm">No files uploaded yet</p>
         </div>
         <div v-else class="divide-y divide-border">

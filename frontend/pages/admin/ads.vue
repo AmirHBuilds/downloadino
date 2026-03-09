@@ -2,7 +2,7 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-xl font-bold">Ads</h1>
-      <button @click="showCreate=true" class="btn-primary text-sm py-1.5"><Icon name="mdi:plus" class="w-4 h-4" /> New Ad</button>
+      <button @click="showCreate=true" class="btn-primary text-sm py-1.5"><Icon name="mdilocal:plus" class="w-4 h-4" /> New Ad</button>
     </div>
     <div class="space-y-3">
       <div v-for="ad in ads" :key="ad.id" class="card p-4 flex items-center gap-4">
@@ -16,7 +16,7 @@
           <button @click="toggleAd(ad)" class="text-xs font-mono px-2 py-1 rounded border" :class="ad.is_active ? 'border-success/30 text-success' : 'border-border text-muted'">
             {{ ad.is_active ? 'Active' : 'Inactive' }}
           </button>
-          <button @click="deleteAd(ad.id)" class="btn-ghost py-1 px-2 text-xs text-danger"><Icon name="mdi:trash-can-outline" class="w-4 h-4" /></button>
+          <button @click="deleteAd(ad.id)" class="btn-ghost py-1 px-2 text-xs text-danger"><Icon name="mdilocal:trash-can-outline" class="w-4 h-4" /></button>
         </div>
       </div>
     </div>

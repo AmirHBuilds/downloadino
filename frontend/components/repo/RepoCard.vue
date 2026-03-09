@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex items-start justify-between gap-2 mb-2">
       <div class="flex items-center gap-2 min-w-0">
-        <Icon name="mdi:source-repository" class="w-4 h-4 text-accent-2 shrink-0" />
+        <Icon name="mdilocal:source-repository" class="w-4 h-4 text-accent-2 shrink-0" />
         <span class="font-medium text-sm truncate">
           <button class="text-muted hover:underline" @click.stop.prevent="navigateTo(`/${repo.owner.username}/repos`)">{{ repo.owner.username }}</button>
           <span class="text-muted">/</span>
@@ -19,19 +19,19 @@
 
     <!-- Warning banner for unverified -->
     <div v-if="displayStatus === 'rejected'" class="flex items-center gap-1.5 text-xs text-danger bg-danger/5 border border-danger/30 rounded px-2 py-1.5 mb-3">
-      <Icon name="mdi:alert-circle" class="w-3.5 h-3.5 shrink-0" />
+      <Icon name="mdilocal:alert-circle" class="w-3.5 h-3.5 shrink-0" />
       Marked as spam
     </div>
     <div v-else-if="displayStatus === 'unverified'" class="flex items-center gap-1.5 text-xs text-warning bg-warning/5 border border-warning/20 rounded px-2 py-1.5 mb-3">
-      <Icon name="mdi:alert-outline" class="w-3.5 h-3.5 shrink-0" />
+      <Icon name="mdilocal:alert-outline" class="w-3.5 h-3.5 shrink-0" />
       Download at your own risk — unverified repository
     </div>
 
     <!-- Stats -->
     <div class="flex items-center gap-4 text-xs text-muted font-mono">
-      <span class="flex items-center gap-1"><Icon name="mdi:file-multiple-outline" class="w-3.5 h-3.5" />{{ repo.file_count }} files</span>
-      <span class="flex items-center gap-1"><Icon name="mdi:download-outline" class="w-3.5 h-3.5" />{{ repo.download_count.toLocaleString() }}</span>
-      <span class="flex items-center gap-1"><Icon name="mdi:database-outline" class="w-3.5 h-3.5" />{{ formatBytes(repo.total_size) }}</span>
+      <span class="flex items-center gap-1"><Icon name="mdilocal:file-multiple-outline" class="w-3.5 h-3.5" />{{ repo.file_count }} files</span>
+      <span class="flex items-center gap-1"><Icon name="mdilocal:download-outline" class="w-3.5 h-3.5" />{{ repo.download_count.toLocaleString() }}</span>
+      <span class="flex items-center gap-1"><Icon name="mdilocal:database-outline" class="w-3.5 h-3.5" />{{ formatBytes(repo.total_size) }}</span>
       <span class="ml-auto">{{ formatRelative(repo.updated_at) }}</span>
     </div>
   </NuxtLink>

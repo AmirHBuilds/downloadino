@@ -12,7 +12,7 @@ export default defineNuxtConfig({
     provider: 'server',
     fallbackToApi: false,
     customCollections: [
-      { prefix: 'mdi', dir: './icons/mdi' },
+      { prefix: 'mdilocal', dir: './icons/mdi' },
     ],
   },
   colorMode: {
@@ -35,8 +35,6 @@ export default defineNuxtConfig({
       titleTemplate: '%s — Downloadino',
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@400;500;600;700;800&display=swap' },
       ],
     },
   },

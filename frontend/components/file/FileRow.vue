@@ -5,14 +5,14 @@
     <span class="text-xs text-muted font-mono hidden sm:block">{{ formatBytes(file.size_bytes) }}</span>
     <span class="text-xs text-muted hidden md:block">{{ formatRelative(file.uploaded_at) }}</span>
     <span class="text-xs text-muted font-mono hidden lg:flex items-center gap-1">
-      <Icon name="mdi:download-outline" class="w-3.5 h-3.5" />{{ file.download_count }}
+      <Icon name="mdilocal:download-outline" class="w-3.5 h-3.5" />{{ file.download_count }}
     </span>
     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
       <a :href="downloadHref" class="btn-ghost py-1 px-2 text-xs" :aria-label="`Download ${file.original_name}`">
-        <Icon name="mdi:download" class="w-3.5 h-3.5" />
+        <Icon name="mdilocal:download" class="w-3.5 h-3.5" />
       </a>
       <button v-if="canDelete" @click="$emit('delete', file.id)" class="btn-ghost py-1 px-2 text-xs text-danger hover:text-danger">
-        <Icon name="mdi:trash-can-outline" class="w-3.5 h-3.5" />
+        <Icon name="mdilocal:trash-can-outline" class="w-3.5 h-3.5" />
       </button>
     </div>
   </div>
