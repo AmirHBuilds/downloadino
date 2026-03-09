@@ -19,13 +19,6 @@ mkdir -p "${OUT_DIR}"
 echo "Fetching font stylesheet..."
 curl -fsSL -A "${USER_AGENT}" "${CSS_URL}" -o "${CSS_FILE}"
 
-mapfile -t FONT_URLS < <(sed -n "s/.*url(\(https:\/\/fonts\.gstatic\.com[^)]*\.woff2\)).*/\1/p" "${CSS_FILE}")
-
-if [[ ${#FONT_URLS[@]} -eq 0 ]]; then
-  echo "No .woff2 URLs found in Google Fonts CSS." >&2
-  exit 1
-fi
-
 declare -A EXPECTED_NAMES=(
   ["Syne:400"]="syne-400.woff2"
   ["Syne:500"]="syne-500.woff2"
@@ -36,40 +29,62 @@ declare -A EXPECTED_NAMES=(
   ["IBM Plex Mono:500"]="ibm-plex-mono-500.woff2"
 )
 
-current_family=""
-current_weight=""
+# Parse CSS blocks and emit: key|is_latin|url
+mapfile -t PARSED_ROWS < <(
+  awk '
+    function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
+    /\/\*/ {
+      if (match($0, /\/\*[[:space:]]*([^*]+)[[:space:]]*\*\//, m)) {
+        family=trim(m[1])
+      }
+    }
+    /font-weight:/ {
+      if (match($0, /font-weight:[[:space:]]*([0-9]+)/, m)) weight=m[1]
+    }
+    /src:/ {
+      if (match($0, /url\((https:\/\/fonts\.gstatic\.com[^)]*\.woff2)\)/, m)) url=m[1]
+    }
+    /unicode-range:/ {
+      if (index($0, "U+0000-00FF") > 0) latin=1
+    }
+    /}/ {
+      if (family != "" && weight != "" && url != "") {
+        printf "%s:%s|%d|%s\n", family, weight, latin, url
+      }
+      weight=""; url=""; latin=0
+    }
+  ' "${CSS_FILE}"
+)
 
-declare -A SELECTED_URLS
+if [[ ${#PARSED_ROWS[@]} -eq 0 ]]; then
+  echo "No .woff2 URLs found in Google Fonts CSS." >&2
+  exit 1
+fi
 
-comment_re="^[[:space:]]*/\*[[:space:]]([^*]+)[[:space:]]\*/[[:space:]]*$"
-weight_re="font-weight:[[:space:]]*([0-9]+)"
-url_re="url\((https://fonts\.gstatic\.com[^)]*\.woff2)\)"
+declare -A LATIN_URLS
+declare -A FALLBACK_URLS
 
-while IFS= read -r line; do
-  if [[ "$line" =~ $comment_re ]]; then
-    current_family="${BASH_REMATCH[1]}"
-    current_weight=""
-  elif [[ "$line" =~ $weight_re ]]; then
-    current_weight="${BASH_REMATCH[1]}"
-  elif [[ "$line" =~ $url_re ]]; then
-    if [[ "$line" == *"latin"* ]] && [[ -n "$current_family" ]] && [[ -n "$current_weight" ]]; then
-      key="${current_family}:${current_weight}"
-      if [[ -n "${EXPECTED_NAMES[$key]:-}" ]]; then
-        SELECTED_URLS["$key"]="${BASH_REMATCH[1]}"
-      fi
-    fi
+for row in "${PARSED_ROWS[@]}"; do
+  IFS='|' read -r key is_latin url <<<"${row}"
+  [[ -n "${EXPECTED_NAMES[$key]:-}" ]] || continue
+
+  if [[ "$is_latin" == "1" ]]; then
+    LATIN_URLS["$key"]="$url"
+  elif [[ -z "${FALLBACK_URLS[$key]:-}" ]]; then
+    FALLBACK_URLS["$key"]="$url"
   fi
-done < "${CSS_FILE}"
+done
 
 for key in "${!EXPECTED_NAMES[@]}"; do
-  if [[ -z "${SELECTED_URLS[$key]:-}" ]]; then
+  selected_url="${LATIN_URLS[$key]:-${FALLBACK_URLS[$key]:-}}"
+  if [[ -z "${selected_url}" ]]; then
     echo "Missing URL for ${key} in stylesheet." >&2
     exit 1
   fi
 
   out_file="${OUT_DIR}/${EXPECTED_NAMES[$key]}"
   echo "Downloading ${EXPECTED_NAMES[$key]}"
-  curl -fsSL -A "${USER_AGENT}" "${SELECTED_URLS[$key]}" -o "${out_file}"
+  curl -fsSL -A "${USER_AGENT}" "${selected_url}" -o "${out_file}"
 done
 
 echo "Done. Downloaded local fonts to ${OUT_DIR}"
