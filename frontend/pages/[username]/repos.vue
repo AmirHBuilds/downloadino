@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-xl font-bold">{{ isOwner ? 'My Repositories' : `${username}'s Repositories` }}</h1>
       <button v-if="isOwner" @click="showCreate = true" class="btn-primary py-1.5 text-sm">
-        <Icon name="mdi:plus" class="w-4 h-4" /> New repository
+        <Icon name="mdilocal:plus" class="w-4 h-4" /> New repository
       </button>
     </div>
 
@@ -16,7 +16,7 @@
       <div v-for="i in 3" :key="i" class="card p-4 h-24 animate-pulse"></div>
     </div>
     <div v-else-if="!repos?.length" class="card py-16 text-center text-muted">
-      <Icon name="mdi:source-repository-multiple" class="w-10 h-10 mx-auto mb-3 opacity-30" />
+      <Icon name="mdilocal:source-repository-multiple" class="w-10 h-10 mx-auto mb-3 opacity-30" />
       <p class="text-sm">No repositories yet.</p>
       <button v-if="isOwner" @click="showCreate = true" class="btn-secondary mt-4 text-sm">Create your first repo</button>
     </div>
@@ -39,7 +39,7 @@
           <div v-if="isOwner" class="flex items-center gap-1 shrink-0">
             <button @click.stop="goToUpload(repo)" class="btn-ghost py-1 px-2 text-xs">Upload</button>
             <button @click="deleteRepo(repo.id)" class="btn-ghost py-1 px-2 text-xs text-danger hover:text-danger">
-              <Icon name="mdi:trash-can-outline" class="w-4 h-4" />
+              <Icon name="mdilocal:trash-can-outline" class="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -67,7 +67,7 @@
           <div class="flex gap-2 pt-2">
             <button @click="showCreate=false" class="btn-secondary flex-1 justify-center">Cancel</button>
             <button @click="createRepo" class="btn-primary flex-1 justify-center" :disabled="creating">
-              <Icon v-if="creating" name="mdi:loading" class="w-4 h-4 animate-spin" />Create
+              <Icon v-if="creating" name="mdilocal:loading" class="w-4 h-4 animate-spin" />Create
             </button>
           </div>
         </div>

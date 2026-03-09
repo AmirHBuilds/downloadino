@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-xl font-bold">Users</h1>
       <div class="relative w-64">
-        <Icon name="mdi:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4" />
+        <Icon name="mdilocal:magnify" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted w-4 h-4" />
         <input v-model="q" @input="debouncedRefresh" placeholder="Search users..." class="input pl-9 py-1.5 text-sm" />
       </div>
     </div>
@@ -53,7 +53,7 @@
                   {{ u.is_banned ? 'Unban' : 'Ban' }}
                 </button>
                 <button @click="deleteUser(u.id)" class="btn-ghost py-1 px-2 text-xs text-danger">
-                  <Icon name="mdi:trash-can-outline" class="w-3.5 h-3.5" />
+                  <Icon name="mdilocal:trash-can-outline" class="w-3.5 h-3.5" />
                 </button>
               </div>
             </td>

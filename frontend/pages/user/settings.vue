@@ -21,7 +21,7 @@
           </div>
           <p v-if="msg" class="text-xs" :class="msgOk ? 'text-success' : 'text-danger'">{{ msg }}</p>
           <button @click="save" class="btn-primary text-sm py-1.5" :disabled="saving">
-            <Icon v-if="saving" name="mdi:loading" class="w-4 h-4 animate-spin" />
+            <Icon v-if="saving" name="mdilocal:loading" class="w-4 h-4 animate-spin" />
             Save changes
           </button>
         </div>

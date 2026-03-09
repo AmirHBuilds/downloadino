@@ -21,10 +21,10 @@ const { data: stats } = await useFetch('/api/admin/stats', {
 })
 
 const nav = computed(() => [
-  { to: '/admin', icon: 'mdi:view-dashboard-outline', label: 'Dashboard' },
-  { to: '/admin/verify', icon: 'mdi:shield-check-outline', label: 'Verify Queue', badge: stats.value?.pending_verifications || undefined },
-  { to: '/admin/users', icon: 'mdi:account-group-outline', label: 'Users' },
-  { to: '/admin/repos', icon: 'mdi:source-repository', label: 'Repositories' },
-  { to: '/admin/ads', icon: 'mdi:advertisements', label: 'Ads' },
+  { to: '/admin', icon: 'mdilocal:view-dashboard-outline', label: 'Dashboard' },
+  { to: '/admin/verify', icon: 'mdilocal:shield-check-outline', label: 'Verify Queue', badge: stats.value?.pending_verifications || undefined },
+  { to: '/admin/users', icon: 'mdilocal:account-group-outline', label: 'Users' },
+  { to: '/admin/repos', icon: 'mdilocal:source-repository', label: 'Repositories' },
+  { to: '/admin/ads', icon: 'mdilocal:advertisements', label: 'Ads' },
 ])
 </script>
