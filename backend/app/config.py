@@ -1,7 +1,14 @@
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 from typing import Optional
 
 class Settings(BaseSettings):
+
+    model_config = ConfigDict(
+        env_file=".env",
+        extra="ignore"
+    )
+
     APP_NAME: str = "Downloadino"
     SECRET_KEY: str = "change-this-secret"
     DEBUG: bool = False
@@ -32,8 +39,5 @@ class Settings(BaseSettings):
     SUPERADMIN_USERNAME: str = "admin"
     SUPERADMIN_EMAIL: str = "admin@downloadino.ir"
     SUPERADMIN_PASSWORD: str = "changeme123!"
-
-    class Config:
-        env_file = ".env"
 
 settings = Settings()

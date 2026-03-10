@@ -1,9 +1,8 @@
-version: "3.9"
-
 services:
 
   api:
     # image: voidtrek/downloadino_backend:latest
+    # image: downloadino-api
     build: ./backend
     container_name: downloadino_api
     restart: unless-stopped
@@ -20,6 +19,7 @@ services:
 
   frontend:
     # image: voidtrek/downloadino_frontend:latest
+    # image: downloadino-frontend
     build: ./frontend
     container_name: downloadino_frontend
     restart: unless-stopped
@@ -66,6 +66,7 @@ services:
 
   nginx:
     # image: voidtrek/downloadino_nginx:latest
+    # image: downloadino-nginx
     build: ./nginx
     container_name: downloadino_nginx
     restart: unless-stopped
