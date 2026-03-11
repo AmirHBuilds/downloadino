@@ -59,7 +59,7 @@
           </template>
         </div>
         <div v-if="!tree?.files?.length && !tree?.directories?.length" class="py-16 text-center text-muted">
-          <Icon name="mdilocal:folder-open-outline" class="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <Icon name="mdilocal:folder-directory" class="w-10 h-10 mx-auto mb-3 opacity-30" />
           <p class="text-sm">No files or directories yet</p>
         </div>
         <div v-else class="divide-y divide-border">
@@ -69,7 +69,7 @@
             class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2/50 transition-colors text-left"
             @click="navigateToPath(joinPath(currentPath, dir))"
           >
-            <Icon name="mdilocal:folder-open-outline" class="w-4 h-4 text-muted shrink-0" />
+            <Icon name="mdilocal:folder-directory" class="w-4 h-4 text-muted shrink-0" />
             <span class="text-sm font-mono text-accent-2">{{ dir }}</span>
           </button>
           <FileRow
