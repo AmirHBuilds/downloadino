@@ -359,6 +359,7 @@ async function navigateToPath(path: string) {
       path: route.path,
       query: normalized ? { ...route.query, path: normalized } : Object.fromEntries(Object.entries(route.query).filter(([key]) => key !== 'path')),
     })
+    await refreshTree()
   } finally {
     isNavigatingPath.value = false
     loadingIndicator.finish()
