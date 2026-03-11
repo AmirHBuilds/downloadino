@@ -9,6 +9,7 @@ from app.core.security import get_current_admin, hash_password, require_admin_pe
 from app.db.session import get_db
 from app.models.admin_permission import AdminPermission
 from app.models.file import File
+from app.models.plan import Plan
 from app.models.repo import Repo, VerificationStatus
 from app.models.user import User, UserRole
 from app.schemas.admin import AdminAnalyticsResponse, AdminPermissionsPayload, AdminUserCreate, AdminUserSummary
@@ -326,6 +327,10 @@ async def update_user(
     if data.is_banned is not None:
         user.is_banned = data.is_banned
     if data.plan_id is not None:
+        plan_result = await db.execute(select(Plan).where(Plan.id == data.plan_id, Plan.is_active == True))
+        plan = plan_result.scalar_one_or_none()
+        if not plan:
+            raise HTTPException(status_code=400, detail="Invalid or inactive plan_id")
         user.plan_id = data.plan_id
     return user
 
