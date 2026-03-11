@@ -46,7 +46,7 @@
         <span class="ml-auto flex items-center gap-1.5"><Icon name="mdilocal:clock-outline" class="w-4 h-4" />{{ formatRelative(repo.updated_at) }}</span>
       </div>
 
-      <div class="card overflow-hidden">
+      <div class="card overflow-hidden relative">
         <div class="px-4 py-3 border-b border-border flex items-center justify-between">
           <span class="text-sm font-semibold">Files</span>
           <span class="text-xs text-muted font-mono">{{ tree?.files?.length || 0 }} files · {{ tree?.directories?.length || 0 }} folders</span>
@@ -60,8 +60,11 @@
             <span v-if="index < breadcrumbSegments.length - 1">/</span>
           </template>
         </div>
-        <div v-if="isDirectorySwitching" class="h-1 w-full bg-surface-2 overflow-hidden border-b border-border">
-          <div class="h-full w-1/3 bg-accent/70 animate-pulse"></div>
+        <div
+          v-if="isDirectorySwitching"
+          class="pointer-events-none absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden"
+        >
+          <div class="h-full w-1/3 bg-blue-500 animate-pulse"></div>
         </div>
         <div v-if="!tree?.files?.length && !tree?.directories?.length" class="py-16 text-center text-muted">
           <Icon name="mdilocal:folder-directory" class="w-10 h-10 mx-auto mb-3 opacity-30" />
