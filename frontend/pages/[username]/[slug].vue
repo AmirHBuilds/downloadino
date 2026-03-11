@@ -51,10 +51,12 @@
           <span class="text-sm font-semibold">Files</span>
           <span class="text-xs text-muted font-mono">{{ tree?.files?.length || 0 }} files · {{ tree?.directories?.length || 0 }} folders</span>
         </div>
-        <div class="px-4 py-2 border-b border-border flex items-center gap-1.5 text-xs font-mono text-muted">
+        <div v-if="breadcrumbSegments.length" class="px-4 py-2 border-b border-border flex items-center gap-1.5 text-xs font-mono text-muted">
+          <button class="hover:underline" @click="navigateToPath('')">/</button>
           <span>/</span>
           <template v-for="(segment, index) in breadcrumbSegments" :key="`${segment}-${index}`">
-            <button class="hover:underline text-foreground" @click="navigateToPath(breadcrumbPaths[index])">{{ segment }}</button>
+            <button v-if="index < breadcrumbSegments.length - 1" class="hover:underline text-foreground" @click="navigateToPath(breadcrumbPaths[index])">{{ segment }}</button>
+            <span v-else class="text-foreground">{{ segment }}</span>
             <span v-if="index < breadcrumbSegments.length - 1">/</span>
           </template>
         </div>
@@ -138,6 +140,7 @@ import type { Repo, RepoFile } from '~/types'
 import { visibleVerificationStatus } from '~/utils/repo'
 
 const route = useRoute()
+const router = useRouter()
 const { get, post, put, delete: del } = useApi()
 const apiBase = useRuntimeConfig().public.apiBase
 const { user, isLoggedIn } = useAuth()
@@ -160,7 +163,18 @@ const { data: repo, pending, refresh: refreshRepo } = await useAsyncData(
   { server: false, default: () => null },
 )
 
-const currentPath = ref('')
+function normalizeRoutePath(value: unknown) {
+  const raw = Array.isArray(value) ? value[0] : value
+  if (typeof raw !== 'string') return ''
+  return raw
+    .replace(/\\/g, '/')
+    .split('/')
+    .map((part) => part.trim())
+    .filter((part) => part && part !== '.' && part !== '..')
+    .join('/')
+}
+
+const currentPath = ref(normalizeRoutePath(route.query.path))
 const newDirectory = ref('')
 
 interface RepoTree {
@@ -327,9 +341,25 @@ function joinPath(base: string, next: string) {
   return [base, next].filter(Boolean).join('/')
 }
 
-function navigateToPath(path: string) {
-  currentPath.value = path
+async function navigateToPath(path: string) {
+  const normalized = normalizeRoutePath(path)
+  if (normalized === currentPath.value) return
+  currentPath.value = normalized
+  await router.push({
+    path: route.path,
+    query: normalized ? { ...route.query, path: normalized } : Object.fromEntries(Object.entries(route.query).filter(([key]) => key !== 'path')),
+  })
 }
+
+watch(
+  () => route.query.path,
+  (value) => {
+    const normalized = normalizeRoutePath(value)
+    if (normalized !== currentPath.value) {
+      currentPath.value = normalized
+    }
+  },
+)
 
 async function createDirectory() {
   if (!repo.value || !newDirectory.value.trim()) return
