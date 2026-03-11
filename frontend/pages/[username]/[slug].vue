@@ -69,7 +69,8 @@
             v-for="dir in tree?.directories || []"
             :key="`dir-${dir}`"
             class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2/50 transition-colors text-left"
-            @click="navigateToPath(joinPath(currentPath, dir))"
+            :disabled="treePending || isNavigatingPath"
+            @click="openDirectory(dir)"
           >
             <Icon name="mdilocal:folder-directory" class="w-4 h-4 text-muted shrink-0" />
             <span class="text-sm font-mono text-accent-2">{{ dir }}</span>
@@ -144,6 +145,7 @@ const router = useRouter()
 const { get, post, put, delete: del } = useApi()
 const apiBase = useRuntimeConfig().public.apiBase
 const { user, isLoggedIn } = useAuth()
+const loadingIndicator = useLoadingIndicator()
 
 const isEditingFile = ref(false)
 const editingFile = ref<RepoFile | null>(null)
@@ -176,6 +178,7 @@ function normalizeRoutePath(value: unknown) {
 
 const currentPath = ref(normalizeRoutePath(route.query.path))
 const newDirectory = ref('')
+const isNavigatingPath = ref(false)
 
 interface RepoTree {
   path: string
@@ -183,7 +186,7 @@ interface RepoTree {
   files: RepoFile[]
 }
 
-const { data: tree, refresh: refreshTree } = await useAsyncData(
+const { data: tree, pending: treePending, refresh: refreshTree } = await useAsyncData(
   () => `repo-tree:${repo.value?.owner.username || route.params.username}:${repo.value?.slug || route.params.slug}:${currentPath.value}`,
   async () => {
     if (!repo.value) return { path: '', directories: [], files: [] }
@@ -215,7 +218,7 @@ async function startEditFile(file: RepoFile) {
   isEditingFile.value = true
   try {
     const fullPath = file.directory_path ? `${file.directory_path}/${file.original_name}` : file.original_name
-    const response = await fetch(`${apiBase}/raw/${repo.value?.owner.username}/${repo.value?.slug}/${encodeURIComponent(fullPath)}`)
+    const response = await fetch(`${apiBase}/raw/${repo.value?.owner.username}/${repo.value?.slug}/${encodePathForUrl(fullPath)}`)
     if (!response.ok) throw new Error('Failed to fetch current file content')
     editContent.value = await response.text()
   } catch {
@@ -341,14 +344,30 @@ function joinPath(base: string, next: string) {
   return [base, next].filter(Boolean).join('/')
 }
 
+function encodePathForUrl(path: string) {
+  return path.split('/').map((segment) => encodeURIComponent(segment)).join('/')
+}
+
 async function navigateToPath(path: string) {
   const normalized = normalizeRoutePath(path)
-  if (normalized === currentPath.value) return
-  currentPath.value = normalized
-  await router.push({
-    path: route.path,
-    query: normalized ? { ...route.query, path: normalized } : Object.fromEntries(Object.entries(route.query).filter(([key]) => key !== 'path')),
-  })
+  if (normalized === currentPath.value || isNavigatingPath.value) return
+
+  isNavigatingPath.value = true
+  loadingIndicator.start()
+  try {
+    await router.push({
+      path: route.path,
+      query: normalized ? { ...route.query, path: normalized } : Object.fromEntries(Object.entries(route.query).filter(([key]) => key !== 'path')),
+    })
+  } finally {
+    isNavigatingPath.value = false
+    loadingIndicator.finish()
+  }
+}
+
+async function openDirectory(dir: string) {
+  if (treePending.value || isNavigatingPath.value) return
+  await navigateToPath(joinPath(currentPath.value, dir))
 }
 
 watch(
