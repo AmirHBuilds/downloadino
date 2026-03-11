@@ -93,16 +93,12 @@
             @edit="startEditFile"
           />
         </div>
-        <div class="px-4 py-2 border-t border-border text-xs text-muted font-mono break-all">
-          {{ cloneCurlCommand }}
-        </div>
       </div>
 
-      <div class="card mt-4 p-4">
-        <p class="text-xs text-muted font-mono uppercase tracking-wider mb-2">Clone with curl</p>
-        <p class="text-xs text-muted mb-3">Download this repository as a zip archive:</p>
-        <div class="rounded-md border border-border bg-surface-2 px-3 py-2 text-xs sm:text-sm font-mono break-all">
-          {{ cloneCurlCommand }}
+      <div class="hidden sm:block mt-3">
+        <div class="inline-flex max-w-full items-center gap-2 rounded-md border border-border bg-surface-2/60 px-3 py-1.5 text-[11px] text-muted font-mono">
+          <Icon name="mdilocal:console" class="w-3.5 h-3.5 shrink-0" />
+          <span class="truncate">{{ cloneCurlCommand }}</span>
         </div>
       </div>
 
@@ -223,7 +219,7 @@ const cloneArchiveUrl = computed(() => {
 
 const cloneCurlCommand = computed(() => {
   if (!repo.value) return ''
-  return `clone: curl -L "${cloneArchiveUrl.value}" -o ${repo.value.slug}.zip`
+  return `curl -L "${cloneArchiveUrl.value}" -o ${repo.value.slug}.zip`
 })
 
 const readmeFile = computed(() => tree.value?.files?.find((file) => file.original_name.toLowerCase() === 'readme.md' && !file.directory_path) ?? null)
