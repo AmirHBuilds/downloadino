@@ -72,16 +72,28 @@
           <p class="text-sm">No files or directories yet</p>
         </div>
         <div v-else class="divide-y divide-border">
-          <button
+          <div
             v-for="dir in tree?.directories || []"
-            :key="`dir-${dir}`"
-            class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2/50 transition-colors text-left"
-            :disabled="isDirectorySwitching"
-            @click="openDirectory(dir)"
+            :key="`dir-${dir.path}`"
+            class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2/50 transition-colors"
           >
-            <Icon name="mdilocal:folder-directory" class="w-4 h-4 text-muted shrink-0" />
-            <span class="text-sm font-mono text-accent-2">{{ dir }}</span>
-          </button>
+            <button
+              class="flex-1 min-w-0 flex items-center gap-3 text-left"
+              :disabled="isDirectorySwitching"
+              @click="openDirectory(dir.path)"
+            >
+              <Icon name="mdilocal:folder-directory" class="w-4 h-4 text-muted shrink-0" />
+              <span class="text-sm font-mono text-accent-2 truncate">{{ dir.name }}</span>
+            </button>
+            <span class="text-xs text-muted font-mono shrink-0">{{ formatBytes(dir.size_bytes) }}</span>
+            <button
+              v-if="isOwner"
+              class="btn-ghost py-1 px-2 text-xs text-danger hover:text-danger"
+              @click="onDeleteDirectory(dir.path)"
+            >
+              <Icon name="mdilocal:trash-can-outline" class="w-3.5 h-3.5" />
+            </button>
+          </div>
           <FileRow
             v-for="file in tree?.files || []"
             :key="file.id"
@@ -194,9 +206,15 @@ const currentPath = ref(normalizeRoutePath(route.query.path))
 const newDirectory = ref('')
 const isNavigatingPath = ref(false)
 
+interface RepoTreeDirectory {
+  name: string
+  path: string
+  size_bytes: number
+}
+
 interface RepoTree {
   path: string
-  directories: string[]
+  directories: RepoTreeDirectory[]
   files: RepoFile[]
 }
 
@@ -391,9 +409,9 @@ async function navigateToPath(path: string) {
   }
 }
 
-async function openDirectory(dir: string) {
+async function openDirectory(path: string) {
   if (treePending.value || isNavigatingPath.value) return
-  await navigateToPath(joinPath(currentPath.value, dir))
+  await navigateToPath(path)
 }
 
 watch(
@@ -422,8 +440,17 @@ async function requestVerify() {
 }
 
 async function onDeleteFile(id: number) {
+  if (!confirm('Are you sure you want to remove this file?')) return
   await del(`/api/files/${id}`)
-  await refreshTree()
+  await Promise.all([refreshTree(), refreshRepo()])
+}
+
+async function onDeleteDirectory(path: string) {
+  if (!repo.value) return
+  if (!confirm(`Are you sure you want to remove this folder and all files inside it?\n\n${path}`)) return
+  const query = `?path=${encodeURIComponent(path)}`
+  await del(`/api/users/${repo.value.owner.username}/repos/${repo.value.slug}/directories${query}`)
+  await Promise.all([refreshTree(), refreshRepo()])
 }
 
 useSeoMeta({ title: computed(() => `${route.params.username}/${route.params.slug}`) })
