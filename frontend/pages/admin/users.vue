@@ -156,7 +156,7 @@ const permDraft = reactive<Record<number, AdminPermissions>>({})
 const editDraft = reactive({
   role: 'user' as User['role'],
   storage_gb: 1,
-  plan_id: 1,
+  plan_id: null as number | null,
 })
 
 const newAdmin = reactive({
@@ -200,7 +200,7 @@ function openUserMenu(user: User) {
   selectedUser.value = user
   editDraft.role = user.role
   editDraft.storage_gb = Math.max(1, Math.round(user.storage_limit / 1024 ** 3))
-  editDraft.plan_id = 1
+  editDraft.plan_id = null
 }
 
 async function toggleBan(u: User) {
@@ -214,11 +214,16 @@ async function toggleBan(u: User) {
 async function saveUserEdits() {
   if (!selectedUser.value) return
   const storageGb = Number(editDraft.storage_gb || 0)
-  const planId = Number(editDraft.plan_id || 0)
-  await put(`/api/admin/users/${selectedUser.value.id}`, {
+  const payload: Record<string, number | string> = {
     role: editDraft.role,
     storage_limit: Math.max(1, Math.round(storageGb)) * 1024 ** 3,
-    plan_id: Math.max(1, Math.round(planId)),
+  }
+  if (editDraft.plan_id && Number.isFinite(editDraft.plan_id)) {
+    payload.plan_id = Math.max(1, Math.round(editDraft.plan_id))
+  }
+
+  await put(`/api/admin/users/${selectedUser.value.id}`, {
+    ...payload,
   })
   await refresh()
   selectedUser.value = users.value?.find((item) => item.id === selectedUser.value?.id) || null
