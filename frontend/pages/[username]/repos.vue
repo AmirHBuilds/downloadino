@@ -38,6 +38,9 @@
           </div>
           <div v-if="isOwner" class="flex items-center gap-1 shrink-0">
             <button @click.stop="goToUpload(repo)" class="btn-ghost py-1 px-2 text-xs">Upload</button>
+            <button @click.stop="openEdit(repo)" class="btn-ghost py-1 px-2 text-xs">
+              <Icon name="mdilocal:pencil-outline" class="w-3.5 h-3.5" /> Edit
+            </button>
           </div>
         </div>
       </div>
@@ -81,7 +84,7 @@ import type { Repo } from '~/types'
 import { visibleVerificationStatus, type VerificationStatus } from '~/utils/repo'
 
 const route = useRoute()
-const { get, post } = useApi()
+const { get, post, put } = useApi()
 const { user, fetchUser } = useAuth()
 const username = computed(() => String(route.params.username || ''))
 
