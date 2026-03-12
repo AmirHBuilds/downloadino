@@ -36,6 +36,9 @@
           <NuxtLink :to="`/user/repos/${repo.owner.username}/${repo.slug}/upload`" class="btn-primary text-sm py-1.5">
             <Icon name="mdilocal:upload" class="w-4 h-4" /> Upload files
           </NuxtLink>
+          <button @click="openDeleteRepoModal" class="btn-danger text-sm py-1.5">
+            <Icon name="mdilocal:trash-can-outline" class="w-4 h-4" /> Delete repo
+          </button>
         </div>
       </div>
 
@@ -150,6 +153,29 @@
         </div>
       </div>
 
+      <div v-if="showDeleteRepoModal" class="fixed inset-0 z-50 bg-black/55 flex items-center justify-center p-4" @click.self="closeDeleteRepoModal">
+        <div class="card w-full max-w-md p-5">
+          <div class="flex items-start gap-3 mb-3">
+            <div class="w-9 h-9 rounded-full bg-danger/10 text-danger flex items-center justify-center shrink-0">
+              <Icon name="mdilocal:alert" class="w-5 h-5" />
+            </div>
+            <div>
+              <h3 class="text-base font-semibold">Delete repository?</h3>
+              <p class="text-xs text-muted mt-1">This action is permanent. All files and folders will be removed.</p>
+            </div>
+          </div>
+          <p class="text-xs text-muted mb-2">For safety, type <span class="font-mono text-foreground">{{ repo?.name }}</span> to confirm.</p>
+          <input v-model="deleteRepoConfirmText" class="input text-sm" :placeholder="`Type ${repo?.name || 'repository name'}`" />
+          <p v-if="deleteRepoError" class="text-xs text-danger mt-2">{{ deleteRepoError }}</p>
+          <div class="flex justify-end gap-2 mt-4">
+            <button class="btn-secondary text-sm py-1.5" @click="closeDeleteRepoModal" :disabled="deletingRepo">Cancel</button>
+            <button class="btn-danger text-sm py-1.5" @click="deleteCurrentRepo" :disabled="deletingRepo || deleteRepoConfirmText !== repo?.name">
+              {{ deletingRepo ? 'Deleting...' : 'Delete forever' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
       <AdSlot position="repo_inline" :limit="2" compact wrapper-class="mt-6" />
 
       <div v-if="readmeContent" class="card p-4 mt-6">
@@ -178,6 +204,10 @@ const editingFile = ref<RepoFile | null>(null)
 const editContent = ref('')
 const editError = ref('')
 const savingEdit = ref(false)
+const showDeleteRepoModal = ref(false)
+const deleteRepoConfirmText = ref('')
+const deletingRepo = ref(false)
+const deleteRepoError = ref('')
 
 const { data: repo, pending, refresh: refreshRepo } = await useAsyncData(
   () => `repo-detail:${route.params.username}:${route.params.slug}`,
@@ -478,6 +508,39 @@ async function createDirectory() {
   await post(`/api/users/${repo.value.owner.username}/repos/${repo.value.slug}/directories`, { path: target })
   newDirectory.value = ''
   await refreshTree()
+}
+
+function openDeleteRepoModal() {
+  deleteRepoError.value = ''
+  deleteRepoConfirmText.value = ''
+  showDeleteRepoModal.value = true
+}
+
+function closeDeleteRepoModal() {
+  if (deletingRepo.value) return
+  showDeleteRepoModal.value = false
+  deleteRepoError.value = ''
+  deleteRepoConfirmText.value = ''
+}
+
+async function deleteCurrentRepo() {
+  if (!repo.value) return
+  if (deleteRepoConfirmText.value !== repo.value.name) {
+    deleteRepoError.value = 'Repository name does not match.'
+    return
+  }
+
+  deletingRepo.value = true
+  deleteRepoError.value = ''
+  try {
+    await del(`/api/repos/${repo.value.id}`)
+    showDeleteRepoModal.value = false
+    await navigateTo(`/${repo.value.owner.username}/repos`)
+  } catch (error: any) {
+    deleteRepoError.value = error?.message || 'Failed to delete repository.'
+  } finally {
+    deletingRepo.value = false
+  }
 }
 
 async function requestVerify() {
