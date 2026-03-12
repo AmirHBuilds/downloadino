@@ -38,9 +38,6 @@
           </div>
           <div v-if="isOwner" class="flex items-center gap-1 shrink-0">
             <button @click.stop="goToUpload(repo)" class="btn-ghost py-1 px-2 text-xs">Upload</button>
-            <button @click="deleteRepo(repo.id)" class="btn-ghost py-1 px-2 text-xs text-danger hover:text-danger">
-              <Icon name="mdilocal:trash-can-outline" class="w-4 h-4" />
-            </button>
           </div>
         </div>
       </div>
@@ -82,7 +79,7 @@ import type { Repo } from '~/types'
 import { visibleVerificationStatus, type VerificationStatus } from '~/utils/repo'
 
 const route = useRoute()
-const { get, post, delete: del } = useApi()
+const { get, post } = useApi()
 const { user, fetchUser } = useAuth()
 const username = computed(() => String(route.params.username || ''))
 
@@ -122,12 +119,6 @@ async function createRepo() {
 
 function goToUpload(repo: Repo) {
   navigateTo(`/user/repos/${repo.owner.username}/${repo.slug}/upload`)
-}
-
-async function deleteRepo(id: number) {
-  if (!confirm('Delete this repository and all its files?')) return
-  await del(`/api/repos/${id}`)
-  await refresh()
 }
 
 useSeoMeta({ title: computed(() => `${username.value} repos`) })

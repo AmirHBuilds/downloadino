@@ -2,15 +2,24 @@ import re
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from app.models.repo import Repo
+from app.models.repo import Repo, VerificationStatus
 from app.models.file import File
 from app.models.user import User
 from app.schemas.repo import RepoCreate
+from app.config import settings
 
 def _slugify(name: str) -> str:
     slug = name.lower()
     slug = re.sub(r"[^a-z0-9\-_]", "-", slug)
     return re.sub(r"-+", "-", slug).strip("-")
+
+
+def apply_verification_bonus(owner: User) -> None:
+    owner.storage_limit += settings.VERIFICATION_BONUS_BYTES
+
+
+def remove_verification_bonus(owner: User) -> None:
+    owner.storage_limit = max(0, owner.storage_limit - settings.VERIFICATION_BONUS_BYTES)
 
 async def create_repo(data: RepoCreate, owner: User, db: AsyncSession) -> Repo:
     slug = _slugify(data.name)
@@ -32,4 +41,6 @@ async def delete_repo_and_free_storage(repo: Repo, owner: User, db: AsyncSession
     await db.delete(repo)
     await db.flush()
     owner.storage_used = max(0, owner.storage_used - total_freed)
+    if repo.verification_status == VerificationStatus.VERIFIED:
+        remove_verification_bonus(owner)
     return total_freed

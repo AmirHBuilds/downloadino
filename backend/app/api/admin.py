@@ -15,7 +15,7 @@ from app.models.user import User, UserRole
 from app.schemas.admin import AdminAnalyticsResponse, AdminPermissionsPayload, AdminUserCreate, AdminUserSummary
 from app.schemas.repo import AdminRepoUpdate, AdminVerifyAction, RepoResponse
 from app.schemas.user import UserAdminUpdate, UserProfile
-from app.services.repo_service import delete_repo_and_free_storage
+from app.services.repo_service import delete_repo_and_free_storage, apply_verification_bonus, remove_verification_bonus
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
@@ -227,16 +227,21 @@ async def verify_repo(repo_id: int, action: AdminVerifyAction, db: AsyncSession 
     repo = result.scalar_one_or_none()
     if not repo:
         raise HTTPException(status_code=404, detail="Repository not found")
+    previous_status = repo.verification_status
+
     if action.action == "approve":
         repo.verification_status = VerificationStatus.VERIFIED
         owner_r = await db.execute(select(User).where(User.id == repo.owner_id))
         owner = owner_r.scalar_one_or_none()
-        if owner:
-            from app.config import settings
-
-            owner.storage_limit += settings.VERIFICATION_BONUS_BYTES
+        if owner and previous_status != VerificationStatus.VERIFIED:
+            apply_verification_bonus(owner)
     else:
         repo.verification_status = VerificationStatus.REJECTED
+        if previous_status == VerificationStatus.VERIFIED:
+            owner_r = await db.execute(select(User).where(User.id == repo.owner_id))
+            owner = owner_r.scalar_one_or_none()
+            if owner:
+                remove_verification_bonus(owner)
     repo.verification_note = action.note
     return {"message": f"Repository {action.action}d", "repo_id": repo_id}
 
@@ -281,8 +286,16 @@ async def update_repo(
     if not repo:
         raise HTTPException(status_code=404, detail="Repository not found")
 
+    previous_status = repo.verification_status
+
     if data.verification_status is not None:
         repo.verification_status = data.verification_status
+        owner_r = await db.execute(select(User).where(User.id == repo.owner_id))
+        owner = owner_r.scalar_one_or_none()
+        if owner and previous_status != VerificationStatus.VERIFIED and data.verification_status == VerificationStatus.VERIFIED:
+            apply_verification_bonus(owner)
+        if owner and previous_status == VerificationStatus.VERIFIED and data.verification_status != VerificationStatus.VERIFIED:
+            remove_verification_bonus(owner)
     if data.verification_note is not None:
         repo.verification_note = data.verification_note
     if data.is_public is not None:
