@@ -1,18 +1,15 @@
 <template>
   <div>
-    <div @dragover.prevent @drop.prevent="onDrop" @click="fileInputRef?.click()"
-      class="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-accent-2 transition-colors"
+    <div @dragover.prevent @drop.prevent="onDrop"
+      class="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-accent-2 transition-colors"
       :class="isDragging ? 'border-accent-2 bg-accent-2/5' : ''"
       @dragenter="isDragging=true" @dragleave="isDragging=false">
       <Icon name="mdilocal:cloud-upload-outline" class="w-10 h-10 text-muted mx-auto mb-3" />
-      <p class="text-sm text-fg mb-1">Drop files or folders here, or <span class="text-accent-2">browse</span></p>
+      <p class="text-sm text-fg mb-1">Drop files or folders here, or browse</p>
 
-      <div class="relative inline-block mt-3" @click.stop>
-        <button type="button" class="btn-secondary text-xs" @click="togglePickerMenu">Select files / folder</button>
-        <div v-if="showPickerMenu" class="absolute left-1/2 -translate-x-1/2 z-20 mt-2 w-44 card py-1 text-left shadow-lg">
-          <button type="button" class="w-full px-3 py-2 text-xs hover:bg-surface-2" @click="openFilePicker">Select files</button>
-          <button type="button" class="w-full px-3 py-2 text-xs hover:bg-surface-2" @click="openFolderPicker">Select folder</button>
-        </div>
+      <div class="flex items-center justify-center gap-2 mt-3">
+        <button type="button" class="btn-secondary text-xs" @click="openFilePicker">Select files</button>
+        <button type="button" class="btn-secondary text-xs" @click="openFolderPicker">Select folder</button>
       </div>
 
       <p class="text-xs text-muted">Max 500MB per file · Some unsafe binaries are blocked</p>
@@ -20,14 +17,13 @@
       <input ref="folderInputRef" type="file" multiple webkitdirectory directory class="hidden" @change="onSelectFolder" />
     </div>
 
-    <!-- Upload queue -->
     <div v-if="queue.length" class="mt-3 space-y-2">
       <TransitionGroup name="upload-log" tag="div" class="space-y-2">
       <div v-for="item in queue" :key="item.id" class="card px-3 py-2">
         <div class="flex items-center justify-between mb-1.5 gap-2">
           <span class="text-xs font-mono truncate max-w-xs">{{ item.name }}</span>
           <div class="flex items-center gap-2">
-            <span class="text-xs font-mono" :class="item.status === 'error' ? 'text-danger' : item.status === 'done' ? 'text-success' : item.status === 'queued' ? 'text-muted' : 'text-muted'">
+            <span class="text-xs font-mono" :class="item.status === 'error' ? 'text-danger' : item.status === 'done' ? 'text-success' : 'text-muted'">
               {{ item.status === 'error' ? item.error : item.status === 'done' ? '✓ Done' : item.status === 'queued' ? 'Queued' : `${item.progress}%` }}
             </span>
             <button
@@ -58,7 +54,6 @@ const emit  = defineEmits<{ uploaded: [] }>()
 
 const { uploadFile } = useApi()
 const isDragging = ref(false)
-const showPickerMenu = ref(false)
 const fileInputRef = ref<HTMLInputElement>()
 const folderInputRef = ref<HTMLInputElement>()
 const processing = ref(false)
@@ -86,31 +81,13 @@ interface QueueItem {
 }
 const queue = ref<QueueItem[]>([])
 
-function togglePickerMenu() {
-  showPickerMenu.value = !showPickerMenu.value
-}
-
 function openFilePicker() {
-  showPickerMenu.value = false
   fileInputRef.value?.click()
 }
 
 function openFolderPicker() {
-  showPickerMenu.value = false
   folderInputRef.value?.click()
 }
-
-const closePickerMenu = () => {
-  showPickerMenu.value = false
-}
-
-onMounted(() => {
-  window.addEventListener('click', closePickerMenu)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('click', closePickerMenu)
-})
 
 async function onDrop(e: DragEvent) {
   isDragging.value = false
@@ -248,7 +225,6 @@ async function processQueue() {
   }
 }
 </script>
-
 
 <style scoped>
 .upload-log-enter-active,
