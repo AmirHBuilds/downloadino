@@ -4,6 +4,7 @@ export interface MirrorInfo {
   repo: string
   displayPath: string
   normalizedUrl: string
+  isValid: boolean
 }
 
 export type MirrorPlatform = 'github' | 'gitlab' | 'bitbucket' | 'codeberg' | 'sourcehut' | 'other'
@@ -11,17 +12,17 @@ export type MirrorPlatform = 'github' | 'gitlab' | 'bitbucket' | 'codeberg' | 's
 export interface MirrorPlatformMeta {
   key: MirrorPlatform
   label: string
-  icon: string
+  iconPath: string
   boxClass: string
 }
 
 const platformMeta: Record<MirrorPlatform, MirrorPlatformMeta> = {
-  github: { key: 'github', label: 'GitHub', icon: 'mirror-platforms:github', boxClass: 'border-white/20 bg-black/50' },
-  gitlab: { key: 'gitlab', label: 'GitLab', icon: 'mirror-platforms:gitlab', boxClass: 'border-orange-400/30 bg-orange-500/10' },
-  bitbucket: { key: 'bitbucket', label: 'Bitbucket', icon: 'mirror-platforms:bitbucket', boxClass: 'border-blue-400/30 bg-blue-500/10' },
-  codeberg: { key: 'codeberg', label: 'Codeberg', icon: 'mirror-platforms:codeberg', boxClass: 'border-cyan-400/30 bg-cyan-500/10' },
-  sourcehut: { key: 'sourcehut', label: 'SourceHut', icon: 'mirror-platforms:sourcehut', boxClass: 'border-emerald-400/30 bg-emerald-500/10' },
-  other: { key: 'other', label: 'External source', icon: 'mirror-platforms:other', boxClass: 'border-border bg-surface-2/40' },
+  github: { key: 'github', label: 'GitHub', iconPath: '/icons/platforms/github.svg', boxClass: 'border-white/20 bg-black/45' },
+  gitlab: { key: 'gitlab', label: 'GitLab', iconPath: '/icons/platforms/gitlab.svg', boxClass: 'border-orange-400/30 bg-orange-500/10' },
+  bitbucket: { key: 'bitbucket', label: 'Bitbucket', iconPath: '/icons/platforms/bitbucket.svg', boxClass: 'border-blue-400/30 bg-blue-500/10' },
+  codeberg: { key: 'codeberg', label: 'Codeberg', iconPath: '/icons/platforms/codeberg.svg', boxClass: 'border-cyan-400/30 bg-cyan-500/10' },
+  sourcehut: { key: 'sourcehut', label: 'SourceHut', iconPath: '/icons/platforms/sourcehut.svg', boxClass: 'border-emerald-400/30 bg-emerald-500/10' },
+  other: { key: 'other', label: 'External source', iconPath: '/icons/platforms/other.svg', boxClass: 'border-border bg-surface-2/40' },
 }
 
 const patterns: Array<{ platform: MirrorPlatform; matcher: RegExp }> = [
@@ -45,9 +46,12 @@ export function getMirrorPlatformMeta(platform: MirrorPlatform): MirrorPlatformM
 
 export function parseMirrorUrl(url: string | null | undefined): MirrorInfo | null {
   if (!url) return null
+  const normalizedUrl = url.trim()
+  if (!normalizedUrl) return null
+
   try {
-    const normalizedUrl = url.trim()
     const parsed = new URL(normalizedUrl)
+    const isValid = /^https?:$/i.test(parsed.protocol)
     const platform = detectMirrorPlatform(parsed.hostname)
     const segments = parsed.pathname.split('/').filter(Boolean)
 
@@ -63,16 +67,15 @@ export function parseMirrorUrl(url: string | null | undefined): MirrorInfo | nul
       ? `${owner}/${repo}`
       : `${parsed.hostname}${parsed.pathname}`.replace(/\/$/, '')
 
-    return { platform, owner, repo, displayPath, normalizedUrl }
+    return { platform, owner, repo, displayPath, normalizedUrl, isValid }
   } catch {
-    const raw = String(url).trim()
-    if (!raw) return null
     return {
       platform: 'other',
       owner: '',
       repo: '',
-      displayPath: raw.length > 72 ? `${raw.slice(0, 69)}...` : raw,
-      normalizedUrl: raw,
+      displayPath: normalizedUrl.length > 72 ? `${normalizedUrl.slice(0, 69)}...` : normalizedUrl,
+      normalizedUrl,
+      isValid: false,
     }
   }
 }

@@ -194,7 +194,7 @@
                   :class="repoEditForm.is_mirror ? 'bg-accent-2' : 'bg-surface-3'"
                   @click="repoEditForm.is_mirror = !repoEditForm.is_mirror"
                 >
-                  <span class="absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform duration-300" :class="repoEditForm.is_mirror ? 'translate-x-5' : 'translate-x-0.5'" />
+                  <span class="absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform duration-300" :class="repoEditForm.is_mirror ? 'translate-x-0.5' : 'translate-x-5'" />
                 </button>
               </div>
               <Transition name="fade-slide">
