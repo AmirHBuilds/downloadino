@@ -20,6 +20,8 @@ export interface Repo {
   verification_status: 'unverified' | 'pending' | 'verified' | 'rejected'
   download_count: number
   clone_count: number
+  is_mirror: boolean
+  source_url: string | null
   file_count: number
   total_size: number
   owner: { id: number; username: string; role: string; created_at: string }
@@ -93,4 +95,19 @@ export interface AdminAnalytics {
     files_current_7d: number
   }
   timeline: Array<{ day: string; users: number; repos: number; files: number }>
+}
+
+
+export interface AdminUserMessage {
+  id: number
+  title: string
+  body: string
+  is_active: boolean
+  created_by: number | null
+  recipient_user_id: number | null
+  recipient_username: string | null
+  created_at: string
+  updated_at: string
+  acknowledged_users: number
+  pending_users: number
 }

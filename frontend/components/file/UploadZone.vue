@@ -58,6 +58,17 @@ const fileInputRef = ref<HTMLInputElement>()
 const folderInputRef = ref<HTMLInputElement>()
 const processing = ref(false)
 
+interface WebkitFileSystemEntry {
+  isFile: boolean
+  isDirectory: boolean
+  name: string
+  fullPath: string
+  file: (cb: (file: File) => void, err?: (error: unknown) => void) => void
+  createReader: () => {
+    readEntries: (cb: (entries: WebkitFileSystemEntry[]) => void, err?: (error: unknown) => void) => void
+  }
+}
+
 interface QueueItem {
   id: string
   file: File
