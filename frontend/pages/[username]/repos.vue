@@ -30,7 +30,7 @@
               <span class="text-xs font-mono text-muted border border-border px-1.5 py-0.5 rounded">{{ repo.is_public ? 'Public' : 'Private' }}</span>
             </div>
             <p v-if="repo.description" class="text-xs text-muted truncate">{{ repo.description }}</p>
-            <MirrorSourceBox :repo="repo" class="mt-3" />
+            <MirrorSourceBox :repo="repo" compact class="mt-2" />
             <div class="flex items-center gap-4 mt-3 text-xs text-muted font-mono">
               <span>{{ repo.file_count }} files</span>
               <span>{{ formatBytes(repo.total_size) }}</span>
@@ -76,7 +76,7 @@
               <div v-if="newRepo.is_mirror" class="mt-4">
                 <label class="text-xs text-muted block mb-1.5">Main source URL</label>
                 <input v-model="newRepo.source_url" class="input" placeholder="https://github.com/publisher/repo" />
-                <MirrorSourceBox :repo="mirrorPreviewRepo" class="mt-3" />
+                <MirrorSourceBox :repo="mirrorPreviewRepo" compact class="mt-2" />
               </div>
             </Transition>
           </div>

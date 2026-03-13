@@ -27,7 +27,7 @@
       Download at your own risk — unverified repository
     </div>
 
-    <MirrorSourceBox :repo="repo" class="mb-3" />
+    <MirrorSourceBox :repo="repo" compact class="mb-2" />
 
     <!-- Stats -->
     <div class="flex items-center gap-4 text-xs text-muted font-mono">

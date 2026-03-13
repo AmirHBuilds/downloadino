@@ -12,17 +12,17 @@ export type MirrorPlatform = 'github' | 'gitlab' | 'bitbucket' | 'codeberg' | 's
 export interface MirrorPlatformMeta {
   key: MirrorPlatform
   label: string
-  iconPath: string
+  icon: string
   boxClass: string
 }
 
 const platformMeta: Record<MirrorPlatform, MirrorPlatformMeta> = {
-  github: { key: 'github', label: 'GitHub', iconPath: '/icons/platforms/github.svg', boxClass: 'border-white/20 bg-black/45' },
-  gitlab: { key: 'gitlab', label: 'GitLab', iconPath: '/icons/platforms/gitlab.svg', boxClass: 'border-orange-400/30 bg-orange-500/10' },
-  bitbucket: { key: 'bitbucket', label: 'Bitbucket', iconPath: '/icons/platforms/bitbucket.svg', boxClass: 'border-blue-400/30 bg-blue-500/10' },
-  codeberg: { key: 'codeberg', label: 'Codeberg', iconPath: '/icons/platforms/codeberg.svg', boxClass: 'border-cyan-400/30 bg-cyan-500/10' },
-  sourcehut: { key: 'sourcehut', label: 'SourceHut', iconPath: '/icons/platforms/sourcehut.svg', boxClass: 'border-emerald-400/30 bg-emerald-500/10' },
-  other: { key: 'other', label: 'External source', iconPath: '/icons/platforms/other.svg', boxClass: 'border-border bg-surface-2/40' },
+  github: { key: 'github', label: 'GitHub', icon: 'mirror-platforms:github', boxClass: 'border-white/15 bg-black/35' },
+  gitlab: { key: 'gitlab', label: 'GitLab', icon: 'mirror-platforms:gitlab', boxClass: 'border-orange-400/30 bg-orange-500/10' },
+  bitbucket: { key: 'bitbucket', label: 'Bitbucket', icon: 'mirror-platforms:bitbucket', boxClass: 'border-blue-400/30 bg-blue-500/10' },
+  codeberg: { key: 'codeberg', label: 'Codeberg', icon: 'mirror-platforms:codeberg', boxClass: 'border-cyan-400/30 bg-cyan-500/10' },
+  sourcehut: { key: 'sourcehut', label: 'SourceHut', icon: 'mirror-platforms:sourcehut', boxClass: 'border-emerald-400/30 bg-emerald-500/10' },
+  other: { key: 'other', label: 'External', icon: 'mirror-platforms:other', boxClass: 'border-border bg-surface-2/35' },
 }
 
 const patterns: Array<{ platform: MirrorPlatform; matcher: RegExp }> = [
@@ -57,7 +57,6 @@ export function parseMirrorUrl(url: string | null | undefined): MirrorInfo | nul
 
     let owner = ''
     let repo = ''
-
     if (segments.length >= 2) {
       owner = segments[0]
       repo = segments[1].replace(/\.git$/i, '')
@@ -73,7 +72,7 @@ export function parseMirrorUrl(url: string | null | undefined): MirrorInfo | nul
       platform: 'other',
       owner: '',
       repo: '',
-      displayPath: normalizedUrl.length > 72 ? `${normalizedUrl.slice(0, 69)}...` : normalizedUrl,
+      displayPath: normalizedUrl.length > 58 ? `${normalizedUrl.slice(0, 55)}...` : normalizedUrl,
       normalizedUrl,
       isValid: false,
     }
