@@ -79,12 +79,15 @@ export interface AdminAccount {
 }
 
 export interface AdminAnalytics {
+  period: "today" | "7d" | "30d" | "90d"
   totals: {
     users: number
     repos: number
     files: number
     storage_bytes: number
     downloads: number
+    visits: number
+    unique_visitors: number
   }
   growth: {
     users_7d: number
@@ -93,8 +96,10 @@ export interface AdminAnalytics {
     users_current_7d: number
     repos_current_7d: number
     files_current_7d: number
+    visits_current_period: number
+    unique_visitors_current_period: number
   }
-  timeline: Array<{ day: string; users: number; repos: number; files: number }>
+  timeline: Array<{ day: string; users: number; repos: number; files: number; visits: number; unique_visitors: number }>
 }
 
 
