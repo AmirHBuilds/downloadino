@@ -59,6 +59,9 @@
           <span class="text-sm font-semibold">Files</span>
           <span class="text-xs text-muted font-mono">{{ tree?.files?.length || 0 }} files · {{ tree?.directories?.length || 0 }} folders</span>
         </div>
+        <div v-if="repo?.latest_release_version" class="px-4 py-2 border-b border-border text-xs text-muted">
+          Latest release: <span class="font-mono text-amber-200">releases/{{ repo.latest_release_version }}</span>
+        </div>
         <div v-if="breadcrumbSegments.length" class="px-4 py-2 border-b border-border flex items-center gap-1.5 text-xs font-mono text-muted">
           <button class="hover:underline text-foreground disabled:opacity-60 disabled:cursor-not-allowed" :disabled="isDirectorySwitching" @click="navigateToPath('')">root</button>
           <span>/</span>
@@ -82,7 +85,8 @@
           <div
             v-for="dir in tree?.directories || []"
             :key="`dir-${dir.path}`"
-            class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-surface-2/50 transition-colors"
+            class="w-full flex items-center gap-3 px-4 py-2.5 transition-colors"
+            :class="dir.is_releases_dir ? 'bg-emerald-500/10 hover:bg-emerald-500/15' : dir.is_latest_release ? 'bg-amber-500/10 hover:bg-amber-500/15' : 'hover:bg-surface-2/50'"
           >
             <button
               class="flex-1 min-w-0 flex items-center gap-3 text-left"
@@ -90,9 +94,29 @@
               @click="openDirectory(dir.path)"
             >
               <Icon name="mdilocal:folder-directory" class="w-4 h-4 text-muted shrink-0" />
+              <div class="min-w-0 flex items-center gap-2">
               <span class="text-sm font-mono text-accent-2 truncate">{{ dir.name }}</span>
+              <span v-if="dir.is_releases_dir" class="shrink-0 rounded-full border border-emerald-400/40 bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">Releases</span>
+              <span v-else-if="dir.is_latest_release" class="shrink-0 rounded-full border border-amber-400/40 bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200">Latest</span>
+            </div>
             </button>
             <span class="text-xs text-muted font-mono shrink-0">{{ formatBytes(dir.size_bytes) }}</span>
+            <button
+              v-if="isOwner && tree?.path === 'releases' && !dir.is_latest_release"
+              class="btn-ghost py-1 px-2 text-xs text-amber-200 hover:text-amber-100"
+              title="Mark as latest release"
+              @click.stop="setLatestRelease(dir.name)"
+            >
+              Set latest
+            </button>
+            <button
+              v-if="isOwner && tree?.path === 'releases' && dir.is_latest_release"
+              class="btn-ghost py-1 px-2 text-xs text-muted hover:text-foreground"
+              title="Clear latest release"
+              @click.stop="clearLatestRelease()"
+            >
+              Clear latest
+            </button>
             <button
               v-if="isOwner"
               class="btn-ghost py-1 px-2 text-xs text-danger hover:text-danger"
@@ -204,6 +228,11 @@
                 </div>
               </Transition>
             </div>
+            <div>
+              <label class="text-xs text-muted block mb-1.5">Latest release folder (optional)</label>
+              <input v-model="repoEditForm.latest_release_version" class="input" placeholder="e.g. v1.2.3 (must exist in /releases)" />
+              <p class="mt-1 text-[11px] text-muted">Set this to highlight the latest release in <span class="font-mono">/releases</span> and enable <span class="font-mono">/raw/.../releases/latest/&lt;file&gt;</span>.</p>
+            </div>
             <p v-if="repoEditError" class="text-xs text-danger bg-danger/10 border border-danger/30 rounded px-3 py-2">{{ repoEditError }}</p>
             <div class="flex justify-end gap-2">
               <button class="btn-secondary text-sm py-1.5" @click="closeRepoDetailsEdit" :disabled="savingRepoDetails">Cancel</button>
@@ -274,8 +303,8 @@ const deleteRepoError = ref('')
 const showRepoEditModal = ref(false)
 const savingRepoDetails = ref(false)
 const repoEditError = ref('')
-const repoEditForm = reactive({ name: '', description: '', is_mirror: false, source_url: '' })
-const repoOriginalDetails = reactive({ name: '', description: '', is_mirror: false, source_url: '' })
+const repoEditForm = reactive({ name: '', description: '', is_mirror: false, source_url: '', latest_release_version: '' })
+const repoOriginalDetails = reactive({ name: '', description: '', is_mirror: false, source_url: '', latest_release_version: '' })
 
 const { data: repo, pending, refresh: refreshRepo } = await useAsyncData(
   () => `repo-detail:${route.params.username}:${route.params.slug}`,
@@ -308,6 +337,8 @@ interface RepoTreeDirectory {
   name: string
   path: string
   size_bytes: number
+  is_releases_dir: boolean
+  is_latest_release: boolean
 }
 
 interface RepoTree {
@@ -637,6 +668,7 @@ const hasRepoDetailsChanges = computed(() => (
   || repoEditForm.description !== repoOriginalDetails.description
   || repoEditForm.is_mirror !== repoOriginalDetails.is_mirror
   || repoEditForm.source_url !== repoOriginalDetails.source_url
+  || repoEditForm.latest_release_version !== repoOriginalDetails.latest_release_version
 ))
 
 function openRepoDetailsEdit() {
@@ -649,6 +681,8 @@ function openRepoDetailsEdit() {
   repoOriginalDetails.description = repo.value.description || ''
   repoOriginalDetails.is_mirror = repo.value.is_mirror
   repoOriginalDetails.source_url = repo.value.source_url || ''
+  repoEditForm.latest_release_version = repo.value.latest_release_version || ''
+  repoOriginalDetails.latest_release_version = repo.value.latest_release_version || ''
   repoEditError.value = ''
   showRepoEditModal.value = true
 }
@@ -669,6 +703,7 @@ async function saveRepoDetailsEdit() {
       description: repoEditForm.description || null,
       is_mirror: repoEditForm.is_mirror,
       source_url: repoEditForm.is_mirror ? (repoEditForm.source_url || null) : null,
+      latest_release_version: repoEditForm.latest_release_version || null,
     })
     showRepoEditModal.value = false
     repo.value = updated
@@ -715,6 +750,29 @@ async function deleteCurrentRepo() {
     deleteRepoError.value = error?.message || 'Failed to delete repository.'
   } finally {
     deletingRepo.value = false
+  }
+}
+
+
+async function setLatestRelease(version: string) {
+  if (!repo.value || !version) return
+  try {
+    const updated = await put<Repo>(`/api/repos/${repo.value.id}`, { latest_release_version: version })
+    repo.value = updated
+    await Promise.all([refreshRepo(), refreshTree()])
+  } catch (error: any) {
+    alert(error?.message || 'Failed to set latest release.')
+  }
+}
+
+async function clearLatestRelease() {
+  if (!repo.value) return
+  try {
+    const updated = await put<Repo>(`/api/repos/${repo.value.id}`, { latest_release_version: null })
+    repo.value = updated
+    await Promise.all([refreshRepo(), refreshTree()])
+  } catch (error: any) {
+    alert(error?.message || 'Failed to clear latest release.')
   }
 }
 
