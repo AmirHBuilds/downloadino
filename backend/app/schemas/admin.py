@@ -31,9 +31,12 @@ class AdminAnalyticsPoint(BaseModel):
     users: int
     repos: int
     files: int
+    visits: int
+    unique_visitors: int
 
 
 class AdminAnalyticsResponse(BaseModel):
+    period: str
     totals: dict
     growth: dict
     timeline: list[AdminAnalyticsPoint]

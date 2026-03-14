@@ -10,7 +10,7 @@ from app.db.base import Base
 from app.dependencies import close_redis
 from sqlalchemy import text
 
-from app.api import auth, users, repos, files, ads, admin, raw
+from app.api import auth, users, repos, files, ads, admin, raw, analytics
 
 STARTUP_LOCK_ID = 916_202_603
 
@@ -86,6 +86,7 @@ app.include_router(repos.router, prefix=PREFIX)
 app.include_router(files.router, prefix=PREFIX)
 app.include_router(ads.router, prefix=PREFIX)
 app.include_router(admin.router, prefix=PREFIX)
+app.include_router(analytics.router, prefix=PREFIX)
 app.include_router(raw.router)  # /raw/* — no /api prefix
 
 

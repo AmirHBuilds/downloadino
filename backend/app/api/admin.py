@@ -13,6 +13,7 @@ from app.models.plan import Plan
 from app.models.repo import Repo, VerificationStatus
 from app.models.user import User, UserRole
 from app.models.user_message import UserMessage, UserMessageAck
+from app.models.visit_event import VisitEvent
 from app.schemas.admin import AdminAnalyticsResponse, AdminPermissionsPayload, AdminUserCreate, AdminUserSummary
 from app.schemas.repo import AdminRepoUpdate, AdminVerifyAction, RepoResponse
 from app.schemas.user import UserAdminUpdate, UserProfile
@@ -46,11 +47,24 @@ async def get_stats(db: AsyncSession = Depends(get_db), _=Depends(require_admin_
 
 
 @router.get("/analytics", response_model=AdminAnalyticsResponse)
-async def get_analytics(db: AsyncSession = Depends(get_db), _=Depends(require_admin_permission("view_stats"))):
+async def get_analytics(
+    period: str = Query("30d", pattern="^(today|7d|30d|90d)$"),
+    db: AsyncSession = Depends(get_db),
+    _=Depends(require_admin_permission("view_stats")),
+):
     now = datetime.utcnow()
+
+    period_days_map = {
+        "today": 1,
+        "7d": 7,
+        "30d": 30,
+        "90d": 90,
+    }
+    period_days = period_days_map[period]
+    period_start = now - timedelta(days=period_days - 1)
+
     start_7d = now - timedelta(days=7)
     prev_7d_start = now - timedelta(days=14)
-    start_30d = now - timedelta(days=29)
 
     def growth(curr: int, prev: int) -> float:
         if prev == 0:
@@ -70,35 +84,57 @@ async def get_analytics(db: AsyncSession = Depends(get_db), _=Depends(require_ad
         "files": (await db.execute(select(func.count(File.id)))).scalar() or 0,
         "storage_bytes": (await db.execute(select(func.coalesce(func.sum(File.size_bytes), 0)))).scalar() or 0,
         "downloads": (await db.execute(select(func.coalesce(func.sum(Repo.download_count), 0)))).scalar() or 0,
+        "visits": (await db.execute(select(func.count(VisitEvent.id)))).scalar() or 0,
+        "unique_visitors": (await db.execute(select(func.count(func.distinct(VisitEvent.visitor_key))))).scalar() or 0,
     }
 
+    def normalize_day(value):
+        if hasattr(value, "isoformat"):
+            return value.isoformat()
+        return str(value)
+
     users_daily = {
-        day.date(): cnt
-        for day, cnt in (await db.execute(select(func.date(User.created_at), func.count(User.id)).where(User.created_at >= start_30d).group_by(func.date(User.created_at)))).all()
+        normalize_day(day): cnt
+        for day, cnt in (await db.execute(select(func.date(User.created_at), func.count(User.id)).where(User.created_at >= period_start).group_by(func.date(User.created_at)))).all()
     }
     repos_daily = {
-        day.date(): cnt
-        for day, cnt in (await db.execute(select(func.date(Repo.created_at), func.count(Repo.id)).where(Repo.created_at >= start_30d).group_by(func.date(Repo.created_at)))).all()
+        normalize_day(day): cnt
+        for day, cnt in (await db.execute(select(func.date(Repo.created_at), func.count(Repo.id)).where(Repo.created_at >= period_start).group_by(func.date(Repo.created_at)))).all()
     }
     files_daily = {
-        day.date(): cnt
-        for day, cnt in (await db.execute(select(func.date(File.uploaded_at), func.count(File.id)).where(File.uploaded_at >= start_30d).group_by(func.date(File.uploaded_at)))).all()
+        normalize_day(day): cnt
+        for day, cnt in (await db.execute(select(func.date(File.uploaded_at), func.count(File.id)).where(File.uploaded_at >= period_start).group_by(func.date(File.uploaded_at)))).all()
+    }
+    visits_daily = {
+        normalize_day(day): cnt
+        for day, cnt in (await db.execute(select(func.date(VisitEvent.created_at), func.count(VisitEvent.id)).where(VisitEvent.created_at >= period_start).group_by(func.date(VisitEvent.created_at)))).all()
+    }
+    unique_daily = {
+        normalize_day(day): cnt
+        for day, cnt in (await db.execute(select(func.date(VisitEvent.created_at), func.count(func.distinct(VisitEvent.visitor_key))).where(VisitEvent.created_at >= period_start).group_by(func.date(VisitEvent.created_at)))).all()
     }
 
     timeline = []
-    cursor = start_30d.date()
+    cursor = period_start.date()
     while cursor <= now.date():
+        key = cursor.isoformat()
         timeline.append(
             {
-                "day": cursor.isoformat(),
-                "users": users_daily.get(cursor, 0),
-                "repos": repos_daily.get(cursor, 0),
-                "files": files_daily.get(cursor, 0),
+                "day": key,
+                "users": users_daily.get(key, 0),
+                "repos": repos_daily.get(key, 0),
+                "files": files_daily.get(key, 0),
+                "visits": visits_daily.get(key, 0),
+                "unique_visitors": unique_daily.get(key, 0),
             }
         )
         cursor += timedelta(days=1)
 
+    visits_current = sum(point["visits"] for point in timeline)
+    unique_current = sum(point["unique_visitors"] for point in timeline)
+
     return {
+        "period": period,
         "totals": totals,
         "growth": {
             "users_7d": growth(users_curr, users_prev),
@@ -107,6 +143,8 @@ async def get_analytics(db: AsyncSession = Depends(get_db), _=Depends(require_ad
             "users_current_7d": users_curr,
             "repos_current_7d": repos_curr,
             "files_current_7d": files_curr,
+            "visits_current_period": visits_current,
+            "unique_visitors_current_period": unique_current,
         },
         "timeline": timeline,
     }
