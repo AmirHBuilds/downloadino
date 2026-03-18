@@ -32,9 +32,10 @@
             <p v-if="repo.description" class="text-xs text-muted truncate">{{ repo.description }}</p>
             <MirrorSourceBox :repo="repo" compact class="mt-2" />
             <div class="flex items-center gap-4 mt-3 text-xs text-muted font-mono">
-              <span>{{ repo.file_count }} files</span>
-              <span>{{ formatBytes(repo.total_size) }}</span>
-              <span>{{ formatRelative(repo.updated_at) }}</span>
+              <span class="flex items-center gap-1"><Icon name="mdilocal:file-multiple-outline" class="w-3.5 h-3.5" />{{ repo.file_count }} files</span>
+              <span class="flex items-center gap-1"><Icon name="mdilocal:download-outline" class="w-3.5 h-3.5" />{{ repo.download_count.toLocaleString() }}</span>
+              <span class="flex items-center gap-1"><Icon name="mdilocal:repo-clone" class="w-3.5 h-3.5" />{{ repo.clone_count.toLocaleString() }}</span>
+              <span class="ml-auto flex items-center gap-1"><Icon name="mdilocal:clock-outline" class="w-3.5 h-3.5" />{{ formatRelative(repo.updated_at) }}</span>
             </div>
           </div>
           <div v-if="isOwner" class="flex items-center gap-1 shrink-0">
@@ -103,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { formatBytes, formatRelative } from '~/utils/format'
+import { formatRelative } from '~/utils/format'
 import type { Repo } from '~/types'
 import { visibleVerificationStatus, type VerificationStatus } from '~/utils/repo'
 
