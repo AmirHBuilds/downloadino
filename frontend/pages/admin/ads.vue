@@ -52,10 +52,40 @@
         <div class="space-y-3">
           <div><label class="text-xs text-muted block mb-1.5">Title</label><input v-model="form.title" class="input" /></div>
           <div>
-            <label class="text-xs text-muted block mb-1.5">Media URL (image / GIF / mp4)</label>
-            <input v-model="form.image_url" class="input" />
-            <p class="text-[11px] text-muted mt-1">Recommended sizes: banner 1200×320, featured/inline 1200×628, repository inline 900×360.</p>
+            <label class="text-xs text-muted block mb-1.5">Media source</label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <button
+                type="button"
+                class="btn-ghost justify-center border py-2 text-sm"
+                :class="mediaSource === 'upload' ? 'border-accent text-accent' : 'border-border text-muted'"
+                @click="setMediaSource('upload')"
+              >
+                Upload from device
+              </button>
+              <button
+                type="button"
+                class="btn-ghost justify-center border py-2 text-sm"
+                :class="mediaSource === 'url' ? 'border-accent text-accent' : 'border-border text-muted'"
+                @click="setMediaSource('url')"
+              >
+                Use URL
+              </button>
+            </div>
           </div>
+          <div v-if="mediaSource === 'url'">
+            <label class="text-xs text-muted block mb-1.5">Media URL (image / GIF / mp4)</label>
+            <input v-model="form.image_url" class="input" placeholder="https://example.com/ad-banner.png" />
+          </div>
+          <div v-else>
+            <label class="text-xs text-muted block mb-1.5">Upload media from your device</label>
+            <input ref="fileInput" type="file" class="input" accept="image/*,video/mp4,video/webm" @change="onFileSelected" />
+            <p class="text-[11px] text-muted mt-1">
+              Supported formats: JPG, PNG, GIF, WEBP, SVG, MP4, WEBM. Files are uploaded to the server and served from there.
+            </p>
+            <p v-if="selectedFile" class="text-[11px] text-muted mt-1">Selected: {{ selectedFile.name }}</p>
+            <p v-else-if="editingId && isHostedAdMedia(form.image_url)" class="text-[11px] text-muted mt-1">Using the currently uploaded server copy. Choose another file to replace it.</p>
+          </div>
+          <p class="text-[11px] text-muted">Recommended sizes: banner 1200×320, featured/inline 1200×628, repository inline 900×360.</p>
           <div><label class="text-xs text-muted block mb-1.5">Target URL</label><input v-model="form.target_url" class="input" /></div>
           <div><label class="text-xs text-muted block mb-1.5">Description</label><textarea v-model="form.description" rows="3" class="input" /></div>
           <div>
@@ -67,16 +97,16 @@
           </div>
           <label class="text-xs text-muted flex items-center gap-2"><input type="checkbox" v-model="form.is_active" /> Active</label>
 
-          <div v-if="form.image_url" class="border border-border rounded p-2 bg-surface-2">
+          <div v-if="previewSrc" class="border border-border rounded p-2 bg-surface-2">
             <p class="text-xs text-muted mb-2">Preview</p>
             <div class="h-32 rounded overflow-hidden bg-surface-1">
-              <AdMedia :src="form.image_url" :alt="form.title || 'Ad preview'" />
+              <AdMedia :src="previewSrc" :alt="form.title || 'Ad preview'" />
             </div>
           </div>
 
           <div class="flex gap-2 pt-2">
             <button @click="showModal = false" class="btn-secondary flex-1 justify-center">Cancel</button>
-            <button @click="saveAd" class="btn-primary flex-1 justify-center">{{ editingId ? 'Save' : 'Create' }}</button>
+            <button @click="saveAd" class="btn-primary flex-1 justify-center" :disabled="isSaving">{{ isSaving ? 'Saving…' : editingId ? 'Save' : 'Create' }}</button>
           </div>
         </div>
       </div>
@@ -90,7 +120,9 @@ import type { Ad } from '~/types'
 definePageMeta({ layout: 'admin', middleware: 'admin' })
 useSeoMeta({ title: 'Admin · Ads' })
 
-const { get, post, put, delete: del } = useApi()
+const HOSTED_AD_MEDIA_PREFIX = '/api/ads/media/'
+
+const { get, post, put, delete: del, uploadFile } = useApi()
 const { data: ads, refresh } = await useAsyncData('admin-ads', () => get<Ad[]>('/api/admin/ads'), { server: false, default: () => [] })
 
 const placementOptions = [
@@ -118,6 +150,10 @@ function positionLabel(position: string) {
     .join(', ')
 }
 
+function isHostedAdMedia(url: string) {
+  return url.startsWith(HOSTED_AD_MEDIA_PREFIX)
+}
+
 const query = ref('')
 const statusFilter = ref<'all' | 'active' | 'inactive'>('all')
 const positionFilter = ref('all')
@@ -125,11 +161,18 @@ const positionFilter = ref('all')
 const showModal = ref(false)
 const editingId = ref<number | null>(null)
 const selectedPlacements = ref<string[]>(['banner'])
+const mediaSource = ref<'url' | 'upload'>('url')
+const selectedFile = ref<File | null>(null)
+const filePreviewUrl = ref<string | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+const isSaving = ref(false)
 const form = reactive({ title: '', image_url: '', target_url: '', description: '', position: 'banner', is_active: true })
 
 watch(selectedPlacements, (placements) => {
   form.position = placements.join(',')
 })
+
+const previewSrc = computed(() => filePreviewUrl.value || form.image_url)
 
 const filteredAds = computed(() => {
   const list = ads.value || []
@@ -144,6 +187,18 @@ const filteredAds = computed(() => {
   })
 })
 
+function clearSelectedFile() {
+  if (filePreviewUrl.value) URL.revokeObjectURL(filePreviewUrl.value)
+  filePreviewUrl.value = null
+  selectedFile.value = null
+  if (fileInput.value) fileInput.value.value = ''
+}
+
+function setMediaSource(next: 'url' | 'upload') {
+  mediaSource.value = next
+  if (next === 'url') clearSelectedFile()
+}
+
 function resetForm() {
   form.title = ''
   form.image_url = ''
@@ -152,6 +207,8 @@ function resetForm() {
   form.position = 'banner'
   form.is_active = true
   selectedPlacements.value = ['banner']
+  mediaSource.value = 'upload'
+  clearSelectedFile()
 }
 
 function openCreate() {
@@ -169,7 +226,28 @@ function openEdit(ad: Ad) {
   form.position = ad.position
   form.is_active = ad.is_active
   selectedPlacements.value = adPositions(ad.position)
+  mediaSource.value = isHostedAdMedia(ad.image_url) ? 'upload' : 'url'
+  clearSelectedFile()
   showModal.value = true
+}
+
+function onFileSelected(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0] || null
+  clearSelectedFile()
+  if (!file) return
+
+  selectedFile.value = file
+  filePreviewUrl.value = URL.createObjectURL(file)
+}
+
+async function uploadSelectedMedia() {
+  if (!selectedFile.value) return form.image_url
+
+  const fd = new FormData()
+  fd.append('media', selectedFile.value)
+  const response = await uploadFile<{ url: string }>('/api/admin/ads/upload-media', fd)
+  return response.url
 }
 
 async function saveAd() {
@@ -177,11 +255,38 @@ async function saveAd() {
     alert('Please select at least one placement.')
     return
   }
-  const payload = { ...form, position: selectedPlacements.value.join(','), description: form.description || null }
-  if (editingId.value) await put(`/api/admin/ads/${editingId.value}`, payload)
-  else await post('/api/admin/ads', payload)
-  showModal.value = false
-  await refresh()
+
+  if (mediaSource.value === 'url' && !form.image_url.trim()) {
+    alert('Please provide a media URL.')
+    return
+  }
+
+  if (mediaSource.value === 'upload' && !selectedFile.value && !isHostedAdMedia(form.image_url)) {
+    alert('Please choose a media file to upload.')
+    return
+  }
+
+  isSaving.value = true
+  try {
+    const imageUrl = mediaSource.value === 'upload' ? await uploadSelectedMedia() : form.image_url.trim()
+    const payload = {
+      ...form,
+      image_url: imageUrl,
+      position: selectedPlacements.value.join(','),
+      description: form.description || null,
+    }
+
+    if (editingId.value) await put(`/api/admin/ads/${editingId.value}`, payload)
+    else await post('/api/admin/ads', payload)
+
+    showModal.value = false
+    await refresh()
+    clearSelectedFile()
+  } catch (error) {
+    alert(error instanceof Error ? error.message : 'Unable to save ad.')
+  } finally {
+    isSaving.value = false
+  }
 }
 
 async function toggleAd(ad: Ad) {
@@ -194,4 +299,8 @@ async function deleteAd(id: number) {
   await del(`/api/admin/ads/${id}`)
   await refresh()
 }
+
+onBeforeUnmount(() => {
+  clearSelectedFile()
+})
 </script>
