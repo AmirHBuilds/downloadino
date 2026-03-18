@@ -18,7 +18,7 @@
       <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
         <div>
           <div class="flex flex-wrap items-center gap-2 text-sm mb-2">
-            <Icon name="mdilocal:repo-clone" class="w-4 h-4 text-muted" />
+            <Icon name="mdilocal:source-repository" class="w-4 h-4 text-muted" />
             <NuxtLink :to="`/${repo.owner.username}/repos`" class="text-muted hover:underline">{{ repo.owner.username }}</NuxtLink>
             <span class="text-muted">/</span>
             <span class="font-semibold">{{ repo.name }}</span>
@@ -368,11 +368,11 @@ const cloneDownloadFileName = computed(() => {
 
 const readmeFile = computed(() => tree.value?.files?.find((file) => file.original_name.toLowerCase() === 'readme.md' && !file.directory_path) ?? null)
 
-const { data: readmeContent } = await useAsyncData(
+const { data: readmeContent, refresh: refreshReadme } = await useAsyncData(
   () => `repo-readme:${repo.value?.owner.username || route.params.username}:${repo.value?.slug || route.params.slug}:${readmeFile.value?.id || 0}`,
   async () => {
     if (!repo.value || !readmeFile.value) return null
-    const res = await fetch(`${apiBase}/raw/${repo.value.owner.username}/${repo.value.slug}/${encodeURIComponent(readmeFile.value.original_name)}`)
+    const res = await fetch(`${apiBase}/raw/${repo.value.owner.username}/${repo.value.slug}/${encodeURIComponent(readmeFile.value.original_name)}?track=false`, { cache: 'no-store' })
     if (!res.ok) return null
     return await res.text()
   },
@@ -385,7 +385,7 @@ async function startEditFile(file: RepoFile) {
   isEditingFile.value = true
   try {
     const fullPath = file.directory_path ? `${file.directory_path}/${file.original_name}` : file.original_name
-    const response = await fetch(`${apiBase}/raw/${repo.value?.owner.username}/${repo.value?.slug}/${encodePathForUrl(fullPath)}`)
+    const response = await fetch(`${apiBase}/raw/${repo.value?.owner.username}/${repo.value?.slug}/${encodePathForUrl(fullPath)}?track=false`, { cache: 'no-store' })
     if (!response.ok) throw new Error('Failed to fetch current file content')
     editContent.value = await response.text()
   } catch {
@@ -407,7 +407,7 @@ async function saveEditedFile() {
   editError.value = ''
   try {
     await put(`/api/files/${editingFile.value.id}/content`, { content: editContent.value })
-    await Promise.all([refreshTree(), refreshRepo()])
+    await Promise.all([refreshTree(), refreshRepo(), refreshReadme()])
     cancelEdit()
   } catch (error: any) {
     editError.value = error?.message || 'Failed to save file.'
