@@ -34,14 +34,13 @@
       <span class="flex items-center gap-1"><Icon name="mdilocal:file-multiple-outline" class="w-3.5 h-3.5" />{{ repo.file_count }} files</span>
       <span class="flex items-center gap-1"><Icon name="mdilocal:download-outline" class="w-3.5 h-3.5" />{{ repo.download_count.toLocaleString() }}</span>
       <span class="hidden sm:flex items-center gap-1"><Icon name="mdilocal:repo-clone" class="w-3.5 h-3.5" />{{ repo.clone_count.toLocaleString() }}</span>
-      <span class="flex items-center gap-1"><Icon name="mdilocal:database-outline" class="w-3.5 h-3.5" />{{ formatBytes(repo.total_size) }}</span>
       <span class="ml-auto flex items-center gap-1"><Icon name="mdilocal:clock-outline" class="w-3.5 h-3.5" />{{ formatRelative(repo.created_at) }}</span>
     </div>
   </NuxtLink>
 </template>
 
 <script setup lang="ts">
-import { formatBytes, formatRelative } from '~/utils/format'
+import { formatRelative } from '~/utils/format'
 import type { Repo } from '~/types'
 import { visibleVerificationStatus } from '~/utils/repo'
 
