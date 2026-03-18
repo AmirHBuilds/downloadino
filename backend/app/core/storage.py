@@ -16,9 +16,11 @@ def _stored_name(original: str) -> str:
     ext = os.path.splitext(original)[1].lower()
     return f"{uuid.uuid4().hex}{ext}"
 
-async def save_file(content: bytes, original_filename: str, repo_id: int) -> tuple[str, str]:
+
+async def save_storage_file(content: bytes, original_filename: str, storage_dir: str) -> tuple[str, str]:
+    normalized_dir = storage_dir.strip("/")
     stored_name = _stored_name(original_filename)
-    storage_path = f"repos/{repo_id}/{stored_name}"
+    storage_path = f"{normalized_dir}/{stored_name}" if normalized_dir else stored_name
     if settings.STORAGE_BACKEND == "s3":
         async with _s3_session().client("s3", endpoint_url=settings.S3_ENDPOINT_URL, config=Config(signature_version="s3v4")) as s3:
             try:
@@ -26,11 +28,15 @@ async def save_file(content: bytes, original_filename: str, repo_id: int) -> tup
             except Exception as e:
                 raise HTTPException(status_code=500, detail=f"Storage error: {e}")
     else:
-        full_dir = os.path.join(settings.LOCAL_STORAGE_PATH, "repos", str(repo_id))
+        full_dir = os.path.join(settings.LOCAL_STORAGE_PATH, normalized_dir) if normalized_dir else settings.LOCAL_STORAGE_PATH
         os.makedirs(full_dir, exist_ok=True)
         async with aiofiles.open(os.path.join(full_dir, stored_name), "wb") as f:
             await f.write(content)
     return stored_name, storage_path
+
+
+async def save_file(content: bytes, original_filename: str, repo_id: int) -> tuple[str, str]:
+    return await save_storage_file(content, original_filename, f"repos/{repo_id}")
 
 async def delete_file(storage_path: str) -> None:
     if settings.STORAGE_BACKEND == "s3":
