@@ -31,32 +31,43 @@
       <RepoCard v-for="repo in repos" :key="repo.id" :repo="repo" />
     </div>
 
-    <div class="mt-8 space-y-8">
-      <div class="card p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-2 rounded-full border border-border bg-surface px-2 py-1.5 shadow-sm overflow-x-auto">
-          <button class="btn-ghost px-3 py-2" :disabled="page === 1 || pending" @click="goToPage(page - 1)">
-            <Icon name="mdilocal:arrow-left" class="w-4 h-4" />
-            Previous
-          </button>
-          <button
-            v-for="pageNumber in visiblePages"
-            :key="pageNumber"
-            class="min-w-9 h-9 rounded-full px-3 text-sm font-medium transition-colors"
-            :class="pageNumber === page ? 'bg-accent text-white shadow-sm' : 'text-muted hover:text-fg hover:bg-surface-2'"
-            :disabled="pending"
-            @click="goToPage(pageNumber)"
-          >
-            {{ pageNumber }}
-          </button>
-          <button class="btn-primary px-3 py-2" :disabled="!canGoNext || pending" @click="goToPage(page + 1)">
-            Next
-          </button>
-        </div>
+    <div class="mt-10 space-y-8">
+      <div class="card p-4 sm:p-5">
+        <div class="flex flex-col items-center gap-3">
+          <div class="inline-flex max-w-full items-center gap-1.5 overflow-x-auto rounded-2xl border border-border bg-surface px-1.5 py-1.5 shadow-sm">
+            <button
+              class="inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-fg disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted"
+              :disabled="page === 1 || pending"
+              @click="goToPage(page - 1)"
+            >
+              <Icon name="mdilocal:arrow-left" class="w-4 h-4" />
+              Previous
+            </button>
+            <button
+              v-for="pageNumber in visiblePages"
+              :key="pageNumber"
+              class="min-w-10 h-10 rounded-xl px-3 text-sm font-medium transition-all"
+              :class="pageNumber === page ? 'bg-accent text-white shadow-sm' : 'text-muted hover:bg-surface-2 hover:text-fg'"
+              :disabled="pending"
+              @click="goToPage(pageNumber)"
+            >
+              {{ pageNumber }}
+            </button>
+            <button
+              class="inline-flex h-10 items-center gap-2 rounded-xl bg-accent px-3 text-sm font-medium text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
+              :disabled="!canGoNext || pending"
+              @click="goToPage(page + 1)"
+            >
+              Next
+              <Icon name="mdilocal:arrow-left" class="w-4 h-4 rotate-180" />
+            </button>
+          </div>
 
-        <p class="text-xs text-muted font-mono">
-          <template v-if="pending">Loading repositories…</template>
-          <template v-else>Page {{ page }}</template>
-        </p>
+          <p class="text-xs font-mono text-muted">
+            <template v-if="pending">Loading repositories…</template>
+            <template v-else>Page {{ page }}</template>
+          </p>
+        </div>
       </div>
 
       <AdSlot position="explore_inline" :limit="3" compact />
