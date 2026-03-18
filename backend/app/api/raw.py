@@ -3,7 +3,7 @@ Raw file serving — like raw.githubusercontent.com
 Usage: bash <(curl -Ls https://api.mirrorino.com/raw/username/repo-slug/install.sh)
 """
 import os
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -21,7 +21,14 @@ SCRIPT_EXTS = {".sh",".bash",".zsh",".py",".rb",".js",".ts",".json",".yaml",".ym
 
 @router.get("/raw/{username}/{repo_slug}/{filename:path}")
 @limiter.limit("100/hour")
-async def get_raw_file(request: Request, username: str, repo_slug: str, filename: str, db: AsyncSession = Depends(get_db)):
+async def get_raw_file(
+    request: Request,
+    username: str,
+    repo_slug: str,
+    filename: str,
+    track: bool = Query(True, description="Whether this request should increment download counters"),
+    db: AsyncSession = Depends(get_db),
+):
     user_r = await db.execute(select(User).where(User.username == username.lower()))
     user = user_r.scalar_one_or_none()
     if not user:
@@ -55,9 +62,10 @@ async def get_raw_file(request: Request, username: str, repo_slug: str, filename
         raise HTTPException(status_code=404, detail=f"File '{filename}' not found")
 
     content = await get_file_content(file.storage_path)
-    file.download_count += 1
-    repo.download_count += 1
-    await db.commit()
+    if track:
+        file.download_count += 1
+        repo.download_count += 1
+        await db.commit()
 
     ext = os.path.splitext(filename)[1].lower()
     if file.detected_type in TEXT_MIMES or ext in SCRIPT_EXTS:
@@ -65,4 +73,5 @@ async def get_raw_file(request: Request, username: str, repo_slug: str, filename
     else:
         content_type = file.detected_type or "application/octet-stream"
 
-    return Response(content=content, media_type=content_type, headers={"X-File-Name": file.original_name, "Cache-Control": "public, max-age=300"})
+    cache_control = "public, max-age=300" if track else "no-store, max-age=0"
+    return Response(content=content, media_type=content_type, headers={"X-File-Name": file.original_name, "Cache-Control": cache_control})

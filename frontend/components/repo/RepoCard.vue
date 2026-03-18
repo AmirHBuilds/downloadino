@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="flex items-start justify-between gap-2 mb-2">
       <div class="flex items-center gap-2 min-w-0">
-        <Icon name="mdilocal:repo-clone" class="w-4 h-4 text-accent-2 shrink-0" />
+        <Icon name="mdilocal:source-repository" class="w-4 h-4 text-accent-2 shrink-0" />
         <span class="font-medium text-sm truncate">
           <button class="text-muted hover:underline" @click.stop.prevent="navigateTo(`/${repo.owner.username}/repos`)">{{ repo.owner.username }}</button>
           <span class="text-muted">/</span>

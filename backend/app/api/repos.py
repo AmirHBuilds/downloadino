@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
 from sqlalchemy.orm import selectinload
@@ -26,6 +26,7 @@ async def _enrich(repo: Repo, db: AsyncSession) -> dict:
 
 @router.get("/", response_model=list[RepoResponse])
 async def list_public_repos(
+    response: Response,
     q: str | None = Query(None),
     page: int = Query(1, ge=1),
     limit: int = Query(20, ge=1, le=100),
@@ -43,13 +44,18 @@ async def list_public_repos(
                 User.username.ilike(like),
             )
         )
+    count_query = select(func.count()).select_from(query.order_by(None).subquery())
+    total_count = (await db.execute(count_query)).scalar_one()
+    if response is not None:
+        response.headers["X-Total-Count"] = str(total_count)
+
     if sort == "downloads":
         order = Repo.download_count.desc()
     elif sort == "clones":
         order = Repo.clone_count.desc()
     else:
-        order = Repo.created_at.desc()
-    result = await db.execute(query.offset((page - 1) * limit).limit(limit).order_by(order))
+        order = Repo.updated_at.desc()
+    result = await db.execute(query.order_by(order).offset((page - 1) * limit).limit(limit))
     return [await _enrich(r, db) for r in result.scalars().all()]
 
 @router.post("/", response_model=RepoResponse, status_code=201)
