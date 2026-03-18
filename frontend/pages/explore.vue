@@ -63,10 +63,6 @@
             </button>
           </div>
 
-          <p class="text-xs font-mono text-muted">
-            <template v-if="pending">Loading repositories…</template>
-            <template v-else>Page {{ page }}</template>
-          </p>
         </div>
       </div>
 
