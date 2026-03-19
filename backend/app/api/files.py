@@ -25,6 +25,12 @@ class FileContentUpdate(BaseModel):
     content: str
 
 
+def _is_releases_path(path: str | None) -> bool:
+    normalized = (path or "").strip("/")
+    lowered = normalized.lower()
+    return lowered == "releases" or lowered.startswith("releases/")
+
+
 async def _get_repo_by_identity(db: AsyncSession, username: str, repo_slug: str) -> Repo | None:
     result = await db.execute(
         select(Repo)
@@ -52,10 +58,12 @@ async def clone_repo_archive(request: Request, username: str, repo_slug: str, db
     with zipfile.ZipFile(archive_file, mode="w", compression=zipfile.ZIP_DEFLATED) as zip_file:
         for directory in all_dirs:
             dir_path = directory.strip("/")
-            if dir_path:
+            if dir_path and not _is_releases_path(dir_path):
                 zip_file.writestr(f"{dir_path}/", "")
 
         for file in files:
+            if _is_releases_path(file.directory_path):
+                continue
             file_content = await get_file_content(file.storage_path)
             archive_path = f"{file.directory_path}/{file.original_name}" if file.directory_path else file.original_name
             zip_file.writestr(archive_path, file_content)
