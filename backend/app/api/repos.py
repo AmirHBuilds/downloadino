@@ -13,6 +13,26 @@ from app.services.repo_service import create_repo, delete_repo_and_free_storage,
 
 router = APIRouter(prefix="/repos", tags=["Repositories"])
 
+
+def _apply_public_repo_filters(query, q: str | None):
+    query = query.join(User, Repo.owner_id == User.id).where(Repo.is_public == True)
+    if q:
+        like = f"%{q}%"
+        query = query.where(
+            or_(
+                Repo.name.ilike(like),
+                Repo.slug.ilike(like),
+                Repo.description.ilike(like),
+                User.username.ilike(like),
+            )
+        )
+    return query
+
+
+def _public_repo_query(q: str | None):
+    return _apply_public_repo_filters(select(Repo).options(selectinload(Repo.owner)), q)
+
+
 async def _enrich(repo: Repo, db: AsyncSession) -> dict:
     stats = await db.execute(select(func.count(File.id), func.coalesce(func.sum(File.size_bytes), 0)).where(File.repo_id == repo.id))
     file_count, total_size = stats.one()
@@ -32,17 +52,7 @@ async def list_public_repos(
     sort: str = Query("recent"),
     db: AsyncSession = Depends(get_db),
 ):
-    query = select(Repo).options(selectinload(Repo.owner)).join(User, Repo.owner_id == User.id).where(Repo.is_public == True)
-    if q:
-        like = f"%{q}%"
-        query = query.where(
-            or_(
-                Repo.name.ilike(like),
-                Repo.slug.ilike(like),
-                Repo.description.ilike(like),
-                User.username.ilike(like),
-            )
-        )
+    query = _public_repo_query(q)
     if sort == "downloads":
         order = Repo.download_count.desc()
     elif sort == "clones":
@@ -51,6 +61,16 @@ async def list_public_repos(
         order = Repo.created_at.desc()
     result = await db.execute(query.offset((page - 1) * limit).limit(limit).order_by(order))
     return [await _enrich(r, db) for r in result.scalars().all()]
+
+
+@router.get("/count")
+async def count_public_repos(
+    q: str | None = Query(None),
+    db: AsyncSession = Depends(get_db),
+):
+    count_query = _apply_public_repo_filters(select(func.count(Repo.id)), q).order_by(None)
+    total = await db.scalar(count_query)
+    return {"total": total or 0}
 
 @router.post("/", response_model=RepoResponse, status_code=201)
 async def create_new_repo(data: RepoCreate, db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):

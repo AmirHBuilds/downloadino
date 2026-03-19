@@ -22,7 +22,7 @@
     <div v-if="pending" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <div v-for="i in 9" :key="i" class="card p-4 animate-pulse h-32"></div>
     </div>
-    <div v-else-if="repos?.length === 0" class="card text-center py-20 text-muted">
+    <div v-else-if="repos.length === 0" class="card text-center py-20 text-muted">
       <Icon name="mdilocal:source-repository-multiple" class="w-12 h-12 mx-auto mb-3 opacity-30" />
       <p class="text-sm">No repositories found for this page.</p>
       <button v-if="page > 1" class="btn-ghost mt-4" @click="goToPage(page - 1)">Go back one page</button>
@@ -33,7 +33,7 @@
 
     <div class="mt-10 space-y-8">
       <div class="card p-4 sm:p-5">
-        <div class="flex flex-col items-center gap-3">
+        <div class="flex justify-center">
           <div class="inline-flex max-w-full items-center gap-1.5 overflow-x-auto rounded-2xl border border-border bg-surface px-1.5 py-1.5 shadow-sm">
             <button
               class="inline-flex h-10 items-center gap-2 rounded-xl px-3 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-fg disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-muted"
@@ -43,16 +43,23 @@
               <Icon name="mdilocal:arrow-left" class="w-4 h-4" />
               Previous
             </button>
-            <button
-              v-for="pageNumber in visiblePages"
-              :key="pageNumber"
-              class="min-w-10 h-10 rounded-xl px-3 text-sm font-medium transition-all"
-              :class="pageNumber === page ? 'bg-accent text-white shadow-sm' : 'text-muted hover:bg-surface-2 hover:text-fg'"
-              :disabled="pending"
-              @click="goToPage(pageNumber)"
-            >
-              {{ pageNumber }}
-            </button>
+            <template v-for="item in paginationItems" :key="item.key">
+              <span
+                v-if="item.type === 'ellipsis'"
+                class="inline-flex h-10 min-w-10 items-center justify-center px-2 text-sm text-muted"
+              >
+                …
+              </span>
+              <button
+                v-else
+                class="min-w-10 h-10 rounded-xl px-3 text-sm font-medium transition-all"
+                :class="item.value === page ? 'bg-accent text-white shadow-sm' : 'text-muted hover:bg-surface-2 hover:text-fg'"
+                :disabled="pending"
+                @click="goToPage(item.value)"
+              >
+                {{ item.value }}
+              </button>
+            </template>
             <button
               class="inline-flex h-10 items-center gap-2 rounded-xl bg-accent px-3 text-sm font-medium text-white transition-colors hover:bg-accent/90 disabled:opacity-50"
               :disabled="!canGoNext || pending"
@@ -62,7 +69,6 @@
               <Icon name="mdilocal:arrow-left" class="w-4 h-4 rotate-180" />
             </button>
           </div>
-
         </div>
       </div>
 
@@ -76,11 +82,20 @@ import type { Repo } from '~/types'
 
 useSeoMeta({ title: 'Explore' })
 
-const pageSize = 40
+const pageSize = 30
 const route = useRoute()
 const router = useRouter()
 const { get } = useApi()
 const allowedSorts = new Set(['downloads', 'clones', 'recent'])
+
+type PaginationItem =
+  | { type: 'page'; key: string; value: number }
+  | { type: 'ellipsis'; key: string }
+
+type ExploreData = {
+  repos: Repo[]
+  totalCount: number
+}
 
 function parsePage(value: unknown) {
   const parsed = Number.parseInt(String(value || '1'), 10)
@@ -90,19 +105,51 @@ function parsePage(value: unknown) {
 const sort = ref(allowedSorts.has(String(route.query.sort || 'downloads')) ? String(route.query.sort || 'downloads') : 'downloads')
 const page = ref(parsePage(route.query.page))
 
-const { data: repos, pending } = await useAsyncData(
+const { data: exploreData, pending } = await useAsyncData(
   () => `explore:${sort.value}:${page.value}`,
-  () => get<Repo[]>(`/api/repos/?page=${page.value}&limit=${pageSize}&sort=${sort.value}`),
-  { server: false, default: () => [], watch: [sort, page] },
+  async (): Promise<ExploreData> => {
+    const [repos, count] = await Promise.all([
+      get<Repo[]>(`/api/repos/?page=${page.value}&limit=${pageSize}&sort=${sort.value}`),
+      get<{ total: number }>('/api/repos/count'),
+    ])
+    return { repos, totalCount: count.total }
+  },
+  { server: false, default: () => ({ repos: [], totalCount: 0 }), watch: [sort, page] },
 )
 
-const canGoNext = computed(() => repos.value.length === pageSize)
-const visiblePages = computed(() => {
-  const pages = new Set<number>([page.value])
-  if (page.value > 1) pages.add(page.value - 1)
-  if (page.value > 2) pages.add(1)
-  if (canGoNext.value) pages.add(page.value + 1)
-  return [...pages].sort((a, b) => a - b)
+const repos = computed(() => exploreData.value.repos)
+const totalPages = computed(() => Math.max(1, Math.ceil(exploreData.value.totalCount / pageSize)))
+const canGoNext = computed(() => page.value < totalPages.value)
+const paginationItems = computed<PaginationItem[]>(() => {
+  const items: PaginationItem[] = []
+  const current = page.value
+  const total = totalPages.value
+
+  const addPage = (value: number) => {
+    items.push({ type: 'page', key: `page-${value}`, value })
+  }
+
+  const addEllipsis = (key: string) => {
+    items.push({ type: 'ellipsis', key })
+  }
+
+  if (total <= 7) {
+    for (let value = 1; value <= total; value += 1) addPage(value)
+    return items
+  }
+
+  addPage(1)
+
+  if (current > 3) addEllipsis('left')
+
+  const start = Math.max(2, current - 1)
+  const end = Math.min(total - 1, current + 1)
+  for (let value = start; value <= end; value += 1) addPage(value)
+
+  if (current < total - 2) addEllipsis('right')
+
+  addPage(total)
+  return items
 })
 
 async function syncRoute() {
@@ -113,7 +160,7 @@ async function syncRoute() {
 }
 
 async function goToPage(nextPage: number) {
-  if (nextPage < 1 || nextPage === page.value) return
+  if (nextPage < 1 || nextPage > totalPages.value || nextPage === page.value) return
   page.value = nextPage
   await syncRoute()
   if (import.meta.client) window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -122,6 +169,12 @@ async function goToPage(nextPage: number) {
 watch(sort, async (newSort, oldSort) => {
   if (newSort === oldSort) return
   page.value = 1
+  await syncRoute()
+})
+
+watch(totalPages, async (nextTotalPages) => {
+  if (page.value <= nextTotalPages) return
+  page.value = nextTotalPages
   await syncRoute()
 })
 
