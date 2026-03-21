@@ -138,16 +138,30 @@ const paginationItems = computed<PaginationItem[]>(() => {
     return items
   }
 
+  if (current <= 3) {
+    addPage(1)
+    addPage(2)
+    addPage(3)
+    addEllipsis('right')
+    addPage(total)
+    return items
+  }
+
+  if (current >= total - 2) {
+    addPage(1)
+    addEllipsis('left')
+    addPage(total - 2)
+    addPage(total - 1)
+    addPage(total)
+    return items
+  }
+
   addPage(1)
-
-  if (current > 3) addEllipsis('left')
-
-  const start = Math.max(2, current - 1)
-  const end = Math.min(total - 1, current + 1)
-  for (let value = start; value <= end; value += 1) addPage(value)
-
-  if (current < total - 2) addEllipsis('right')
-
+  addEllipsis('left')
+  addPage(current - 1)
+  addPage(current)
+  addPage(current + 1)
+  addEllipsis('right')
   addPage(total)
   return items
 })
