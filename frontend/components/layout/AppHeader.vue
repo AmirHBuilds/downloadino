@@ -59,9 +59,14 @@
       </div>
     </div>
 
-    <div class="w-full border-t border-accent-2/40 bg-accent-2/10 text-accent-2">
-      <div lang="fa" dir="rtl" class="max-w-7xl mx-auto px-4 py-2 text-center text-xs sm:text-sm font-persian">
-        میرورینو صرفا به عنوان یک میرور برای توسعه دهندگان عمل میکند و پایبند به قوانین است
+    <div class="w-full border-t border-accent-2/30 bg-gradient-to-b from-accent-2/10 to-surface-1/70">
+      <div lang="fa" dir="rtl" class="max-w-7xl mx-auto px-4 py-2.5 text-center font-persian">
+        <div class="text-xs sm:text-sm text-accent-2">
+          میرورینو صرفا به عنوان یک میرور برای توسعه دهندگان عمل میکند و پایبند به قوانین است
+        </div>
+        <div class="mt-2 inline-flex max-w-full items-center justify-center rounded-full border border-border bg-surface/80 px-3 py-1 text-[11px] font-medium text-fg-dim shadow-sm sm:px-4 sm:text-xs">
+          این وبسایت داخلی است و ترافیک آن نیم بها محاسبه میشود
+        </div>
       </div>
     </div>
 
