@@ -1,3 +1,5 @@
+const uploadTimeoutMs = Number.parseInt(process.env.NUXT_PUBLIC_UPLOAD_TIMEOUT_MS || '300000', 10)
+
 export default defineNuxtConfig({
   devtools: { enabled: false },
   components: [{ path: '~/components', pathPrefix: false }],
@@ -26,6 +28,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://api.mirrorino.com',
+      uploadTimeoutMs: Number.isFinite(uploadTimeoutMs) && uploadTimeoutMs > 0 ? uploadTimeoutMs : 300000,
       supportEmail: process.env.NUXT_PUBLIC_SUPPORT_EMAIL || '',
       supportTelegramId: process.env.NUXT_PUBLIC_SUPPORT_TELEGRAM_ID || '',
       supportWebsite: process.env.NUXT_PUBLIC_SUPPORT_WEBSITE || '',

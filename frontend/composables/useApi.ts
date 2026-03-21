@@ -3,6 +3,7 @@ let refreshPromise: Promise<string | null> | null = null
 export function useApi() {
   const config = useRuntimeConfig()
   const base = config.public.apiBase
+  const uploadTimeoutMs = Math.max(1, Number(config.public.uploadTimeoutMs || 300000))
   const tokenCookie = useCookie<string | null>('token')
 
   async function refreshAccessToken(): Promise<string | null> {
@@ -72,7 +73,7 @@ export function useApi() {
             if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100))
           }
         }
-        xhr.timeout = 120000
+        xhr.timeout = uploadTimeoutMs
         xhr.onload = () => {
           if (xhr.status >= 200 && xhr.status < 300) {
             try {
@@ -91,7 +92,7 @@ export function useApi() {
         }
         xhr.onerror = () => reject(new Error('Network error'))
         xhr.onabort = () => reject(new Error('Upload cancelled'))
-        xhr.ontimeout = () => reject(new Error('Upload timed out while waiting for server response'))
+        xhr.ontimeout = () => reject(new Error(`Upload timed out after ${Math.round(uploadTimeoutMs / 1000)} seconds while waiting for server response`))
         xhr.send(formData)
       })
     },
