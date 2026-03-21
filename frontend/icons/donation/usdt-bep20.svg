@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M18.754 10.518c0 .625-2.238 1.148-5.238 1.28l.002.001a23 23 0 0 1-1.5.033c-.779 0-1.33-.023-1.524-.032c-3.006-.133-5.25-.656-5.25-1.282s2.244-1.15 5.25-1.284v2.044c.196.015.759.048 1.537.048c.933 0 1.4-.04 1.485-.047V9.236c3 .133 5.238.657 5.238 1.282m5.19.546L12.124 22.39a.18.18 0 0 1-.249 0L.056 11.064a.18.18 0 0 1-.038-.208l4.376-9.192a.18.18 0 0 1 .163-.103h14.888a.18.18 0 0 1 .16.103l4.377 9.192a.18.18 0 0 1-.038.208m-4.478-.404c0-.806-2.552-1.48-5.947-1.637V7.195h4.186v-2.79H6.308v2.79h4.185v1.829c-3.402.156-5.96.83-5.96 1.637c0 .808 2.558 1.48 5.96 1.638v5.862h3.025v-5.864c3.394-.157 5.948-.83 5.948-1.637"/></svg>
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="6" y="6" width="116" height="116" rx="28" fill="#111827" stroke="#334155" stroke-width="4"/>
+  <path d="M64 28L92 44V76L64 92L36 76V44L64 28Z" fill="#10B981" fill-opacity="0.14" stroke="#10B981" stroke-width="4"/>
+  <path d="M46 50H82" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round"/>
+  <path d="M64 50V82" stroke="#F8FAFC" stroke-width="5" stroke-linecap="round"/>
+  <ellipse cx="64" cy="60" rx="22" ry="7" stroke="#F8FAFC" stroke-width="4"/>
+</svg>

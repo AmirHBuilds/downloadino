@@ -6,7 +6,7 @@
         <div class="space-y-6">
           <div class="inline-flex items-center gap-2 rounded-full border border-accent-2/30 bg-accent-2/10 px-3 py-1 text-xs font-mono uppercase tracking-[0.24em] text-accent-2">
             <span class="h-2 w-2 rounded-full bg-accent-2 shadow-[0_0_12px_rgba(34,211,238,0.9)]"></span>
-            Support Mirrorino
+            Donation
           </div>
 
           <div>
@@ -32,7 +32,7 @@
           <div class="rounded-3xl border border-accent/20 bg-gradient-to-br from-accent/12 via-surface-1 to-surface-1 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.28)]">
             <div class="flex flex-wrap items-center gap-3 text-sm text-muted">
               <span class="rounded-full border border-success/25 bg-success/10 px-3 py-1 text-success">Community funded</span>
-              <span class="rounded-full border border-border bg-surface/70 px-3 py-1">Dark mode by default</span>
+              <span class="rounded-full border border-border bg-surface/70 px-3 py-1">Independent infrastructure</span>
               <span class="rounded-full border border-border bg-surface/70 px-3 py-1">No third-party payment widgets</span>
             </div>
             <p class="mt-4 text-sm leading-7 text-muted sm:text-base">
@@ -94,7 +94,7 @@
 const config = useRuntimeConfig()
 
 const donationMessage = computed(
-  () => config.public.donationMessage || 'If Mirrorino helps your workflow, your support keeps the platform stable, modern, and accessible for everyone.',
+  () => config.public.donationMessage || 'If Mirrorino helps your workflow, your donation helps keep the platform stable, modern, and accessible for everyone.',
 )
 
 const donationMethods = computed(() => [
@@ -131,7 +131,7 @@ const supportStats = [
 ]
 
 useSeoMeta({
-  title: 'Support Mirrorino',
-  description: 'Support Mirrorino with Bitcoin, USDT (BEP20), or card transfer details.',
+  title: 'Donation',
+  description: 'Donate to Mirrorino with Bitcoin, USDT (BEP20), or card transfer details.',
 })
 </script>
