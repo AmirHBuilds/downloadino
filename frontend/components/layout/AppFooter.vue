@@ -5,7 +5,7 @@
         <span class="font-mono">▼ Mirrorino</span>
         <span>Self-hosted file distribution for the Iranian intranet</span>
         <div class="flex items-center gap-4">
-          <NuxtLink to="/donate" class="text-accent hover:underline">Support Mirrorino</NuxtLink>
+          <NuxtLink to="/donate" class="text-accent hover:underline">Donation</NuxtLink>
           <NuxtLink to="/contact" class="text-accent-2 hover:underline">Contact support</NuxtLink>
         </div>
       </div>

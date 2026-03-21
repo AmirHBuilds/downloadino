@@ -46,6 +46,17 @@ NUXT_PUBLIC_SUPPORT_TELEGRAM_ID=@mirrorino_support
 NUXT_PUBLIC_SUPPORT_WEBSITE=https://mirrorino.com
 ```
 
+### Donation details configuration
+
+Set these values in your root `.env` file to populate `/donate` page details:
+
+```env
+NUXT_PUBLIC_DONATION_MESSAGE="If Mirrorino helps you, consider donating to keep it online."
+NUXT_PUBLIC_DONATION_BITCOIN="bc1q47ru7at5ry5aehrfm3txa82ufe6vsc5jghv4jw"
+NUXT_PUBLIC_DONATION_USDT_BEP20="0xe26f56B542b8872e8c55F7aBf5b6Ff8ab46AbA4A"
+NUXT_PUBLIC_DONATION_CARD_NUMBER="6219-8619-3861-9417"
+```
+
 Then recreate the frontend container so Nuxt picks up new env values:
 
 ```bash
