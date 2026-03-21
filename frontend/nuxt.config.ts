@@ -14,6 +14,7 @@ export default defineNuxtConfig({
     customCollections: [
       { prefix: 'mdilocal', dir: './icons/mdi' },
       { prefix: 'mirror-platforms', dir: './icons/platforms' },
+      { prefix: 'donation', dir: './icons/donation' },
     ],
   },
   colorMode: {
@@ -28,6 +29,10 @@ export default defineNuxtConfig({
       supportEmail: process.env.NUXT_PUBLIC_SUPPORT_EMAIL || '',
       supportTelegramId: process.env.NUXT_PUBLIC_SUPPORT_TELEGRAM_ID || '',
       supportWebsite: process.env.NUXT_PUBLIC_SUPPORT_WEBSITE || '',
+      donationMessage: process.env.NUXT_PUBLIC_DONATION_MESSAGE || '',
+      donationBitcoin: process.env.NUXT_PUBLIC_DONATION_BITCOIN || '',
+      donationUsdtBep20: process.env.NUXT_PUBLIC_DONATION_USDT_BEP20 || '',
+      donationCardNumber: process.env.NUXT_PUBLIC_DONATION_CARD_NUMBER || '',
     },
   },
   app: {

@@ -18,6 +18,7 @@
       <!-- Nav -->
       <nav class="flex items-center gap-1">
         <NuxtLink to="/explore" class="btn-ghost text-sm">Explore</NuxtLink>
+        <NuxtLink to="/donate" class="hidden sm:inline-flex btn-ghost text-sm border border-accent/30 bg-accent/10 text-accent hover:bg-accent/20 hover:text-white">Donation</NuxtLink>
         <template v-if="isLoggedIn">
           <NuxtLink v-if="isAdmin" to="/admin" class="btn-ghost text-sm">Admin</NuxtLink>
           <NuxtLink :to="myReposHref" class="btn-ghost text-sm">My Repos</NuxtLink>
