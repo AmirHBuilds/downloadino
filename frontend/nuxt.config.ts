@@ -14,6 +14,7 @@ export default defineNuxtConfig({
     customCollections: [
       { prefix: 'mdilocal', dir: './icons/mdi' },
       { prefix: 'mirror-platforms', dir: './icons/platforms' },
+      { prefix: 'donation', dir: './icons/donation' },
     ],
   },
   colorMode: {

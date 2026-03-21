@@ -61,11 +61,9 @@
               class="group rounded-3xl border border-white/7 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent-2/35 hover:shadow-[0_16px_50px_rgba(34,211,238,0.08)] sm:p-5"
             >
               <div class="flex items-start gap-4">
-                <img
-                  :src="method.icon"
-                  :alt="`${method.title} icon placeholder`"
-                  class="h-14 w-14 rounded-2xl border border-white/10 bg-surface-2 p-3 shadow-inner"
-                >
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-surface-2 p-3 shadow-inner">
+                  <Icon :name="method.icon" class="h-full w-full" />
+                </div>
 
                 <div class="min-w-0 flex-1">
                   <div class="flex flex-wrap items-center gap-3">
@@ -106,7 +104,7 @@ const donationMethods = computed(() => [
     label: 'Wallet address',
     value: config.public.donationBitcoin || 'Not configured yet',
     description: 'Ideal for direct international support with native Bitcoin transfers.',
-    icon: '/donation-icons/bitcoin-placeholder.svg',
+    icon: 'donation:bitcoin',
   },
   {
     title: 'USDT (BEP20)',
@@ -114,7 +112,7 @@ const donationMethods = computed(() => [
     label: 'Wallet address',
     value: config.public.donationUsdtBep20 || 'Not configured yet',
     description: 'Use the Binance Smart Chain network when sending USDT to this address.',
-    icon: '/donation-icons/usdt-bep20-placeholder.svg',
+    icon: 'donation:usdt-bep20',
   },
   {
     title: 'Card number',
@@ -122,7 +120,7 @@ const donationMethods = computed(() => [
     label: 'Card number',
     value: config.public.donationCardNumber || 'Not configured yet',
     description: 'For supporters who prefer a direct card transfer instead of crypto.',
-    icon: '/donation-icons/card-placeholder.svg',
+    icon: 'donation:card',
   },
 ])
 
