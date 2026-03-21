@@ -69,12 +69,6 @@
         </div>
       </div>
     </div>
-
-    <div class="w-full border-t border-warning/40 bg-warning/10 text-warning">
-      <div lang="fa" dir="rtl" class="max-w-7xl mx-auto px-4 py-2 text-center text-xs sm:text-sm font-persian font-medium">
-        این وبسایت داخلی است و ترافیک آن نیم بها محاسبه میشود
-      </div>
-    </div>
   </header>
 </template>
 
