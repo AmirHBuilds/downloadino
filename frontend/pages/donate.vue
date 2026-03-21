@@ -6,7 +6,7 @@
         <div class="space-y-6">
           <div class="inline-flex items-center gap-2 rounded-full border border-accent-2/30 bg-accent-2/10 px-3 py-1 text-xs font-mono uppercase tracking-[0.24em] text-accent-2">
             <span class="h-2 w-2 rounded-full bg-accent-2 shadow-[0_0_12px_rgba(34,211,238,0.9)]"></span>
-            Support Mirrorino
+            Donation
           </div>
 
           <div>
@@ -32,7 +32,7 @@
           <div class="rounded-3xl border border-accent/20 bg-gradient-to-br from-accent/12 via-surface-1 to-surface-1 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.28)]">
             <div class="flex flex-wrap items-center gap-3 text-sm text-muted">
               <span class="rounded-full border border-success/25 bg-success/10 px-3 py-1 text-success">Community funded</span>
-              <span class="rounded-full border border-border bg-surface/70 px-3 py-1">Dark mode by default</span>
+              <span class="rounded-full border border-border bg-surface/70 px-3 py-1">Independent infrastructure</span>
               <span class="rounded-full border border-border bg-surface/70 px-3 py-1">No third-party payment widgets</span>
             </div>
             <p class="mt-4 text-sm leading-7 text-muted sm:text-base">
@@ -61,11 +61,9 @@
               class="group rounded-3xl border border-white/7 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent-2/35 hover:shadow-[0_16px_50px_rgba(34,211,238,0.08)] sm:p-5"
             >
               <div class="flex items-start gap-4">
-                <img
-                  :src="method.icon"
-                  :alt="`${method.title} icon placeholder`"
-                  class="h-14 w-14 rounded-2xl border border-white/10 bg-surface-2 p-3 shadow-inner"
-                >
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-surface-2 p-3 shadow-inner">
+                  <Icon :name="method.icon" class="h-full w-full" />
+                </div>
 
                 <div class="min-w-0 flex-1">
                   <div class="flex flex-wrap items-center gap-3">
@@ -96,7 +94,7 @@
 const config = useRuntimeConfig()
 
 const donationMessage = computed(
-  () => config.public.donationMessage || 'If Mirrorino helps your workflow, your support keeps the platform stable, modern, and accessible for everyone.',
+  () => config.public.donationMessage || 'If Mirrorino helps your workflow, your donation helps keep the platform stable, modern, and accessible for everyone.',
 )
 
 const donationMethods = computed(() => [
@@ -106,7 +104,7 @@ const donationMethods = computed(() => [
     label: 'Wallet address',
     value: config.public.donationBitcoin || 'Not configured yet',
     description: 'Ideal for direct international support with native Bitcoin transfers.',
-    icon: '/donation-icons/bitcoin-placeholder.svg',
+    icon: 'donation:bitcoin',
   },
   {
     title: 'USDT (BEP20)',
@@ -114,7 +112,7 @@ const donationMethods = computed(() => [
     label: 'Wallet address',
     value: config.public.donationUsdtBep20 || 'Not configured yet',
     description: 'Use the Binance Smart Chain network when sending USDT to this address.',
-    icon: '/donation-icons/usdt-bep20-placeholder.svg',
+    icon: 'donation:usdt-bep20',
   },
   {
     title: 'Card number',
@@ -122,7 +120,7 @@ const donationMethods = computed(() => [
     label: 'Card number',
     value: config.public.donationCardNumber || 'Not configured yet',
     description: 'For supporters who prefer a direct card transfer instead of crypto.',
-    icon: '/donation-icons/card-placeholder.svg',
+    icon: 'donation:card',
   },
 ])
 
@@ -133,7 +131,7 @@ const supportStats = [
 ]
 
 useSeoMeta({
-  title: 'Support Mirrorino',
-  description: 'Support Mirrorino with Bitcoin, USDT (BEP20), or card transfer details.',
+  title: 'Donation',
+  description: 'Donate to Mirrorino with Bitcoin, USDT (BEP20), or card transfer details.',
 })
 </script>
