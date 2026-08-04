@@ -1,6 +1,30 @@
 # Mirrorino
 
-Self-hosted GitHub-style file repository platform.
+> Self-hosted GitHub-style repository platform for sharing, browsing and mirroring files.
+
+<p align="center">
+  <img width="1125" height="630" alt="Screenshot (133)" src="https://github.com/user-attachments/assets/e31a70ec-f493-44da-9aa3-2438f6ea7b5c" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/FastAPI-Backend-009688">
+  <img src="https://img.shields.io/badge/Nuxt-Frontend-00DC82">
+  <img src="https://img.shields.io/badge/PostgreSQL-Database-336791">
+  <img src="https://img.shields.io/badge/Docker-Compose-2496ED">
+  <img src="https://img.shields.io/badge/License-MIT-blue">
+</p>
+
+## ✨ Features
+
+- 📦 Self-hosted GitHub-like repository platform
+- 🔍 Fast repository search
+- 📂 File browser with directory navigation
+- 📄 Markdown & code preview
+- 👤 Authentication and user management
+- ⚡ FastAPI REST API
+- 🐳 One-command Docker deployment
+- 🌐 Responsive modern UI
+- 🔒 Reverse proxy with Nginx
 
 ## Structure
 ```
