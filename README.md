@@ -47,6 +47,24 @@ making open-source repositories available even when GitHub was unreachable.
 - 🌐 Responsive modern UI
 - 🔒 Reverse proxy with Nginx
 
+## Screenshots
+
+### Repository View
+
+<img width="100%" alt="Screenshot (208)" src="https://github.com/user-attachments/assets/fa584e6b-3a8c-4373-a8f6-9e3055cb366c" />
+
+### Admin Dashboard
+
+<img width="100%" alt="Screenshot (197)" src="https://github.com/user-attachments/assets/0a349f84-893b-4dec-b729-67ce60e34768" />
+
+### User Management
+
+<img width="100%" alt="Screenshot (199)" src="https://github.com/user-attachments/assets/e4ec6d4e-421a-48f3-9353-d8f269ba910b" />
+
+### Statistics
+
+<img width="100%" alt="Screenshot (198)" src="https://github.com/user-attachments/assets/44c9bd3e-8bc3-43bb-9cf2-7689e5dec0e2" />
+
 ## Structure
 ```
 mirrorino/
