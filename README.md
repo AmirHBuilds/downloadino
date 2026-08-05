@@ -33,7 +33,7 @@ making open-source repositories available even when GitHub was unreachable.
 
 ## See it in action
 
-<img width="1920" height="1080" alt="Timeline 1" src="https://github.com/user-attachments/assets/16cccd2b-03eb-4667-b8f2-f834aab5796c" />
+<img width="1280" height="720" alt="Timeline 1 (1)" src="https://github.com/user-attachments/assets/683fe03f-ee4b-449a-a940-a2fc7b606e02" />
 
 ## ✨ Features
 
