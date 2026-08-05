@@ -52,7 +52,7 @@ mirrorino/
 └── docker-compose.yml
 ```
 
-## Quick start (use prebuilt images)
+## Quick start
 
 ```bash
 # 1. Copy and fill the single env file
