@@ -1,6 +1,8 @@
 # Mirrorino
 
-> Self-hosted GitHub-style repository platform for sharing, browsing and mirroring files.
+> A self-hosted GitHub mirror that kept open-source software accessible during Iran's nationwide Internet outage.
+
+🚀 Used over **6,000,000 times** during the 2026 Iran internet disruption.
 
 <p align="center">
   <img width="1125" height="630" alt="Screenshot (133)" src="https://github.com/user-attachments/assets/e31a70ec-f493-44da-9aa3-2438f6ea7b5c" />
@@ -13,6 +15,21 @@
   <img src="https://img.shields.io/badge/Docker-Compose-2496ED">
   <img src="https://img.shields.io/badge/License-MIT-blue">
 </p>
+
+## Why Mirrorino?
+
+When access to GitHub became unreliable during Iran's nationwide Internet outage,
+developers still needed packages, repositories and documentation.
+
+Mirrorino was built to solve exactly that problem.
+
+Instead of relying on GitHub availability, organizations can deploy their own mirror in minutes.
+
+During the outage Mirrorino served more than
+
+# 6,000,000 requests
+
+making open-source repositories available even when GitHub was unreachable.
 
 ## ✨ Features
 
@@ -42,49 +59,11 @@ mirrorino/
 cp .env.example .env
 
 # 2. Start everything from Docker Hub images
-docker compose pull
+git clone https://github.com/AmirHBuilds/mirrorino
 docker compose up -d
 
 # 3. API docs available at:
 #    https://api.mirrorino.com/api/docs
-```
-
-`docker-compose.yml` is configured to use:
-- `voidtrek/mirrorino_backend:latest`
-- `voidtrek/mirrorino_frontend:latest`
-- `voidtrek/mirrorino_nginx:latest`
-
-So on your server, you only need:
-- `docker-compose.yml`
-- `.env`
-
-No per-service `.env` files are required.
-
-### Contact details configuration
-
-Set these values in your root `.env` file to populate `/contact` page details:
-
-```env
-NUXT_PUBLIC_SUPPORT_EMAIL=support@mirrorino.com
-NUXT_PUBLIC_SUPPORT_TELEGRAM_ID=@mirrorino_support
-NUXT_PUBLIC_SUPPORT_WEBSITE=https://mirrorino.com
-```
-
-### Donation details configuration
-
-Set these values in your root `.env` file to populate `/donate` page details:
-
-```env
-NUXT_PUBLIC_DONATION_MESSAGE="If Mirrorino helps you, consider donating to keep it online."
-NUXT_PUBLIC_DONATION_BITCOIN="bc1q47ru7at5ry5aehrfm3txa82ufe6vsc5jghv4jw"
-NUXT_PUBLIC_DONATION_USDT_BEP20="0xe26f56B542b8872e8c55F7aBf5b6Ff8ab46AbA4A"
-NUXT_PUBLIC_DONATION_CARD_NUMBER="6219-8619-3861-9417"
-```
-
-Then recreate the frontend container so Nuxt picks up new env values:
-
-```bash
-docker compose up -d --build frontend
 ```
 
 ### Offline icon mode (no public internet needed)
@@ -92,31 +71,6 @@ docker compose up -d --build frontend
 This project is configured to load icons from local files under `frontend/icons/mdi` via Nuxt Icon custom collections.
 No Iconify API access is required.
 
-## Build and push images to Docker Hub
-
-Run these commands from project root on your own machine:
-
-```bash
-# 1) Login
-docker login
-
-# 2) Build images
-docker build -t voidtrek/mirrorino_backend:latest ./backend
-docker build -t voidtrek/mirrorino_frontend:latest ./frontend
-docker build -t voidtrek/mirrorino_nginx:latest ./nginx
-
-# 3) Push images
-docker push voidtrek/mirrorino_backend:latest
-docker push voidtrek/mirrorino_frontend:latest
-docker push voidtrek/mirrorino_nginx:latest
-```
-
-If you want versioned releases too, tag before push (repeat for all three images):
-
-```bash
-docker tag voidtrek/mirrorino_backend:latest voidtrek/mirrorino_backend:v1.0.0
-docker push voidtrek/mirrorino_backend:v1.0.0
-```
 
 ## Default admin
 Username: admin  
