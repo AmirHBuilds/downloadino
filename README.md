@@ -1,6 +1,6 @@
 # Mirrorino
 
-> A self-hosted GitHub mirror that kept open-source software accessible during Iran's nationwide Internet outage.
+> A self-hosted GitHub mirror that kept open-source software accessible during nationwide Internet outage.
 
 🚀 Used over **6,000,000 times** during the 2026 Iran internet disruption.
 
